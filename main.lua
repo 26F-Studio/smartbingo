@@ -153,11 +153,11 @@ local function checkRule(rule, tickMat, x, y)
         return count1 == count2
     elseif rule == 8 then
         return
-            not tickMat[y][x] == 1 or (
-                not safeGet(tickMat, x - 1, y) == 1 and
-                not safeGet(tickMat, x + 1, y) == 1 and
-                not safeGet(tickMat, x, y - 1) == 1 and
-                not safeGet(tickMat, x, y + 1) == 1
+            tickMat[y][x] ~= 1 or (
+                safeGet(tickMat, x - 1, y) ~= 1 and
+                safeGet(tickMat, x + 1, y) ~= 1 and
+                safeGet(tickMat, x, y - 1) ~= 1 and
+                safeGet(tickMat, x, y + 1) ~= 1
             )
     end
 end
@@ -182,21 +182,19 @@ local function checkAnswer()
     if DATA.passDate ~= date then
         DATA.win = DATA.win + 1
         DATA.passDate = date
-        MSG.new('check', Text.winDaily)
+        MSG.new('check', Text.winDaily, 2.6)
         needSave = true
+        DATA.maxTick = count
+        DATA.minTick = count
     end
     if count > (DATA.maxTick or 0) then
         DATA.maxTick = count
-        if DATA.passDate ~= date then
-            MSG.new('check', Text.winMax)
-        end
+        MSG.new('check', Text.winMax, 2.6)
         needSave = true
     end
     if count < (DATA.minTick or 6e26) then
         DATA.minTick = count
-        if DATA.passDate ~= date then
-            MSG.new('check', Text.winMin)
-        end
+        MSG.new('check', Text.winMin, 2.6)
         needSave = true
     end
     if needSave then
@@ -517,6 +515,7 @@ scene.widgetList = {
         type = 'checkBox',
         pos = { 1, 1 }, x = -380, y = -80, w = 40,
         color = 'D',
+        cornerR=0,
         text = LANG 'language',
         disp = TABLE.func_getVal(DATA, 'zh'),
         code = function()
@@ -529,6 +528,7 @@ scene.widgetList = {
         type = 'checkBox',
         pos = { 1, 1 }, x = -210, y = -80, w = 40,
         color = 'D',
+        cornerR=0,
         text = LANG 'sound',
         disp = TABLE.func_getVal(DATA, 'sound'),
         code = function()
@@ -545,6 +545,7 @@ scene.widgetList = {
         type = 'button',
         pos = { 1, 1 }, x = -100, y = -80, w = 110, h = 60,
         color = 'lD',
+        cornerR=0,
         fontSize = 30, text = LANG 'quit',
         code = WIDGET.c_pressKey('escape'),
     },
