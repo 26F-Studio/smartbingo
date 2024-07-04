@@ -182,14 +182,21 @@ local function checkAnswer()
     if DATA.passDate ~= date then
         DATA.win = DATA.win + 1
         DATA.passDate = date
+        MSG.new('check', Text.winDaily)
         needSave = true
     end
     if count > (DATA.maxTick or 0) then
         DATA.maxTick = count
+        if DATA.passDate ~= date then
+            MSG.new('check', Text.winMax)
+        end
         needSave = true
     end
     if count < (DATA.minTick or 6e26) then
         DATA.minTick = count
+        if DATA.passDate ~= date then
+            MSG.new('check', Text.winMin)
+        end
         needSave = true
     end
     if needSave then
@@ -402,7 +409,7 @@ end
 function scene.update(dt)
     if holdTimer then
         holdTimer = holdTimer + dt
-        if holdTimer > 0.626 then
+        if holdTimer > 0.442 then
             local cx, cy = next(dragging):match('(%d)(%d)')
             cx, cy = tonumber(cx), tonumber(cy)
             scene.mouseUp(0, 0, 1)
