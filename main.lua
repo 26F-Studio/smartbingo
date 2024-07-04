@@ -1,0 +1,549 @@
+--------------------------------------------------------------
+-- Smart Bingo
+-- Game by MrZ, 26F-Studio
+-- Original idea from an image of QQ grounp, it has no credit
+--------------------------------------------------------------
+
+require 'Zenitha'
+
+SCR.setSize(500, 1000)
+
+ZENITHA.setMaxFPS(120)
+ZENITHA.setUpdateFreq(100)
+ZENITHA.setDrawFreq(25)
+ZENITHA.globalEvent.drawCursor = NULL
+
+LANG.add {
+    zh = 'lang_zh.lua',
+    en = 'lang_en.lua',
+}
+LANG.setDefault('zh')
+
+local DATA = {
+    zh = true,
+    sound = true,
+
+    win = 0,
+    passDate = false,
+    tickMat = {},
+    maxTick = false,
+    minTick = false,
+}
+for i = 1, 5 do DATA.tickMat[i] = TABLE.new(0, 5) end
+local suc, res = pcall(FILE.load, 'data.json', '-json')
+if suc then TABLE.update(DATA, res) end
+
+BGM.load('naive', 'naive.ogg')
+TASK.new(function()
+    DEBUG.yieldT(0.626)
+    if DATA.sound then
+        BGM.play('naive')
+    end
+end)
+
+SFX.load('tick', 'tick.ogg')
+SFX.load('untick', 'untick.ogg')
+SFX.load('solve', 'solve.ogg')
+
+FONT.load('unifont', 'unifont.otf')
+FONT.setDefaultFont('unifont')
+
+local bgColor = { COLOR.HEX 'EDEDED' }
+BG.add('light', { draw = function() GC.clear(bgColor) end })
+BG.set('light')
+
+local function save()
+    pcall(FILE.save, DATA, 'data.json', '-json')
+end
+
+
+
+
+
+local gc = love.graphics
+local ins, rem = table.insert, table.remove
+
+local ruleColor = {
+    COLOR.R,
+    COLOR.B,
+    COLOR.D,
+    COLOR.G,
+    COLOR.Y,
+    COLOR.O,
+    COLOR.V,
+    COLOR.lR,
+}
+local cellColor = {
+    { 1,  0, .26 },
+    COLOR.B,
+    COLOR.D,
+    COLOR.G,
+    { .9, 1, 0 },
+    COLOR.O,
+    { .8, 0,   1 },
+    { 1,  .62, .82 },
+}
+local board = {
+    X = 20,
+    Y = 50,
+    W = 460,
+    H = 800,
+    titleW = 226,
+    infoH = 300,
+    CW = 92,
+    CH = 100,
+}
+
+local debugColor
+local saveTimer
+local date
+local activeRules = {}
+local ruleMat = {}
+local activeRuleTexts = {}
+local targetText = gc.newText(FONT.get(15))
+
+local function freshRuleText()
+    activeRuleTexts = {}
+    for i = 1, #activeRules do
+        activeRuleTexts[i] = gc.newText(FONT.get(20))
+        activeRuleTexts[i]:setf(Text.rules[activeRules[i]], board.W - board.titleW - 10, 'left')
+    end
+    targetText:setf(Text.target, board.W - board.titleW - 10, 'left')
+end
+
+local function setLang(zh)
+    local l = zh and 'zh' or 'en'
+    Text = LANG.set(l)
+    freshRuleText()
+    WIDGET._reset()
+end
+
+local function safeGet(t, x, y)
+    if t[y] then return t[y][x] end
+    return 0
+end
+local function checkRule(rule, tickMat, x, y)
+    if rule == 1 or rule == 2 or rule == 6 or rule == 7 then
+        local count = 0
+        for _x = x - 1, x + 1 do
+            for _y = y - 1, y + 1 do
+                if (_x ~= x or _y ~= y) and safeGet(tickMat, _x, _y) == 1 then count = count + 1 end
+            end
+        end
+        if rule == 1 then
+            return count >= 1
+        elseif rule == 2 then
+            return count <= 2
+        elseif rule == 6 then
+            return count % 2 == 0
+        elseif rule == 7 then
+            return count % 2 == 1
+        end
+    elseif rule == 3 then
+        return tickMat[y][x] == 1
+    elseif rule == 4 then
+        local xCount, yCount = 0, 0
+        for _x = 1, 5 do if tickMat[y][_x] == 1 then yCount = yCount + 1 end end
+        for _y = 1, 5 do if tickMat[_y][x] == 1 then xCount = xCount + 1 end end
+        return xCount == yCount
+    elseif rule == 5 then
+        local count1, count2 = 0, 0
+        for d = -4, 4 do if safeGet(tickMat, x + d, y + d) == 1 then count1 = count1 + 1 end end
+        for d = -4, 4 do if safeGet(tickMat, x + d, y - d) == 1 then count2 = count2 + 1 end end
+        return count1 == count2
+    elseif rule == 8 then
+        return
+            not tickMat[y][x] == 1 or (
+                not safeGet(tickMat, x - 1, y) == 1 and
+                not safeGet(tickMat, x + 1, y) == 1 and
+                not safeGet(tickMat, x, y - 1) == 1 and
+                not safeGet(tickMat, x, y + 1) == 1
+            )
+    end
+end
+local function checkAnswer()
+    -- Check
+    for y = 1, 5 do
+        for x = 1, 5 do
+            if ruleMat[y][x] and not checkRule(ruleMat[y][x], DATA.tickMat, x, y) then
+                return
+            end
+        end
+    end
+
+    -- Count ticks
+    local count = 0
+    for y = 1, 5 do
+        count = count + TABLE.count(DATA.tickMat[y], 1)
+    end
+
+    -- Win
+    local needSave
+    if DATA.passDate ~= date then
+        DATA.win = DATA.win + 1
+        DATA.passDate = date
+        needSave = true
+    end
+    if count > (DATA.maxTick or 0) then
+        DATA.maxTick = count
+        needSave = true
+    end
+    if count < (DATA.minTick or 6e26) then
+        DATA.minTick = count
+        needSave = true
+    end
+    if needSave then
+        SFX.play('solve')
+        save()
+    end
+end
+
+---@type Zenitha.Scene
+local scene = {}
+
+function scene.load()
+    -- Fresh date
+    date = os.date('!%y%m%d')
+    if DATA.passDate ~= date then
+        DATA.passDate = false
+        DATA.maxTick = false
+        DATA.minTick = false
+        for i = 1, 5 do
+            DATA.tickMat[i] = TABLE.new(0, 5)
+        end
+    end
+
+    -- Seed
+    math.randomseed(os.date('!%Y') * 366 + os.date('!%j'))
+
+    -- Rules
+    activeRules = { 1, 2, 3, 4 }
+    local extraRules = { 5, 6, 7, 8 }
+    for _ = 1, MATH.randFreq { 60, 30, 10 } do
+        ins(activeRules, rem(extraRules, math.random(1, #extraRules)))
+    end
+
+    -- Tick matrix
+    local tickMat = {}
+    for i = 1, 5 do tickMat[i] = TABLE.new(0, 5) end
+    local lineNo = math.random(1, 12) -- Target Line
+    if lineNo <= 5 then
+        for i = 1, 5 do tickMat[lineNo][i] = 1 end
+    elseif lineNo <= 10 then
+        for i = 1, 5 do tickMat[i][lineNo - 5] = 1 end
+    elseif lineNo == 11 then
+        for i = 1, 5 do tickMat[i][i] = 1 end
+    elseif lineNo == 12 then
+        for i = 1, 5 do tickMat[i][6 - i] = 1 end
+    end
+    for _ = 1, math.random(3, 6) do -- Random
+        local rx, ry
+        repeat
+            rx, ry = math.random(1, 5), math.random(1, 5)
+        until tickMat[ry][rx] == 0
+        tickMat[ry][rx] = 1
+    end
+    -- for y=1,5 do
+    --     local s=""
+    --     for x=1,5 do
+    --         s=s..(tickMat[y][x] and "O " or ". ")
+    --     end
+    --     print(s)
+    -- end
+    -- DATA.tickMat = tickMat
+
+    local ruleCount = TABLE.new(0, 8)
+    local pbMat = {}
+    for i = 1, 5 do pbMat[i] = TABLE.new({}, 5) end
+    for y = 1, 5 do
+        for x = 1, 5 do
+            pbMat[y][x] = {}
+            for r = 1, #activeRules do
+                local rule = activeRules[r]
+                if checkRule(rule, tickMat, x, y) then
+                    ins(pbMat[y][x], rule)
+                    ruleCount[rule] = ruleCount[rule] + 1
+                end
+            end
+            -- printf("(%d,%d):%s", x, y, table.concat(pbMat[y][x], ' '))
+        end
+    end
+
+    -- Remove useless rule
+    for i = 1, #ruleCount do
+        if ruleCount[i] == 0 then
+            TABLE.delete(activeRules, i)
+        end
+    end
+    freshRuleText()
+    local existRule = {}
+    for i = 1, #ruleCount do
+        if ruleCount[i] > 0 then
+            ins(existRule, i)
+        end
+    end
+
+    -- Color
+    ruleMat = {}
+    for i = 1, 5 do ruleMat[i] = TABLE.new(false, 5) end
+    -- for y = 1, 5 do
+    --     for x = 1, 5 do
+    --         ruleMat[y][x] = pbMat[y][x]
+    --     end
+    -- end
+    for i = 1, math.random(10, 18) do
+        local rule = existRule[i % #existRule + 1]
+        local pbBlankCells = {}
+        local pbCells = {}
+        for y = 1, 5 do
+            for x = 1, 5 do
+                if pbMat[y][x] and TABLE.find(pbMat[y][x], rule) then
+                    ins(pbCells, { x, y })
+                    if not ruleMat[y][x] then
+                        ins(pbBlankCells, { x, y })
+                    end
+                end
+            end
+        end
+        local targetCell
+        if #pbBlankCells > 0 then
+            targetCell = pbBlankCells[math.random(#pbBlankCells)]
+        else
+            targetCell = pbCells[math.random(#pbCells)]
+        end
+        if targetCell then
+            ruleMat[targetCell[2]][targetCell[1]] = rule
+        end
+    end
+end
+
+function scene.keyDown(k, rep)
+    if rep then return end
+    if k == 'escape' then
+        ZENITHA._quit('fade')
+    end
+    if tonumber(k) then
+        debugColor = tonumber(k)
+    end
+    return true
+end
+
+local function getBoardPos(x, y)
+    local cx = math.floor((x - board.X) / board.CW + 1)
+    local cy = math.floor((y - (board.Y + board.H - board.CH * 5)) / board.CH + 1)
+    return MATH.clamp(cx, 1, 5), MATH.clamp(cy, 1, 5)
+end
+
+local holdTimer
+local dragging
+local dragStart
+function scene.mouseDown(x, y, k)
+    if k == 1 then
+        holdTimer = 0
+        dragging = {}
+        scene.mouseMove(x, y)
+    elseif k == 2 then
+        if dragging then
+            for xy in next, dragging do
+                local cx, cy = xy:match('(%d)(%d)')
+                cx, cy = tonumber(cx), tonumber(cy)
+                DATA.tickMat[cy][cx] = dragStart
+            end
+        elseif MATH.between(x, board.X, board.X + board.W) and MATH.between(y, board.Y + board.infoH, board.Y + board.H) then
+            local cx, cy = getBoardPos(x, y)
+            DATA.tickMat[cy][cx] = DATA.tickMat[cy][cx] == 0 and 2 or 0
+        end
+    end
+end
+
+function scene.mouseMove(x, y)
+    if dragging and MATH.between(x, board.X, board.X + board.W) and MATH.between(y, board.Y + board.infoH, board.Y + board.H) then
+        local cx, cy = getBoardPos(x, y)
+        if not dragStart and DATA.tickMat[cy][cx] == 2 then
+            dragStart = 2
+            dragging[cx .. cy] = true
+        elseif not dragging[cx .. cy] and dragStart ~= 2 and (dragStart == nil or dragStart == DATA.tickMat[cy][cx]) then
+            if not dragStart then
+                dragStart = DATA.tickMat[cy][cx]
+            else
+                holdTimer = false
+            end
+            dragging[cx .. cy] = true
+            DATA.tickMat[cy][cx] = 1 - DATA.tickMat[cy][cx]
+            if DATA.sound then
+                SFX.play(DATA.tickMat[cy][cx] == 1 and 'tick' or 'untick')
+            end
+        end
+    end
+end
+
+function scene.mouseUp(_, _, k)
+    if k == 1 then
+        holdTimer = nil
+        dragging = nil
+        dragStart = nil
+        checkAnswer()
+    end
+    saveTimer = 2.6
+end
+
+function scene.touchDown(x, y)
+    scene.mouseDown(x, y, 1)
+end
+
+function scene.touchMove(x, y)
+    scene.mouseMove(x, y)
+end
+
+function scene.touchUp(x, y)
+    scene.mouseUp(x, y, 1)
+end
+
+function scene.update(dt)
+    if holdTimer then
+        holdTimer = holdTimer + dt
+        if holdTimer > 0.626 then
+            local cx, cy = next(dragging):match('(%d)(%d)')
+            cx, cy = tonumber(cx), tonumber(cy)
+            scene.mouseUp(0, 0, 1)
+            DATA.tickMat[cy][cx] = DATA.tickMat[cy][cx] ~= 2 and 2 or 0
+        end
+    end
+    if saveTimer then
+        saveTimer = saveTimer - dt
+        if saveTimer < 0 then
+            save()
+            saveTimer = nil
+        end
+    end
+end
+
+local tick = GC.load { 62, 62,
+    { 'move',  4,      4 },
+    { 'setLW', 10 },
+    { 'setCL', 0,      0,  0 },
+    { 'line',  0,      26, 26, 48, 52, 0 },
+    { 'setLW', 4 },
+    { 'setCL', COLOR.L },
+    { 'line',  2,      28, 26, 48, 50, 3 },
+}
+local cross = GC.load { 62, 62,
+    { 'move',  4,      4 },
+    { 'setLW', 10 },
+    { 'setCL', 0,      0,  0 },
+    { 'line',  0,      0,  52, 52 },
+    { 'line',  0,      52, 52, 0 },
+    { 'setLW', 4 },
+    { 'setCL', COLOR.L },
+    { 'line',  2,      2,  50, 50 },
+    { 'line',  2,      50, 50, 2 },
+}
+function scene.draw()
+    gc.translate(board.X, board.Y) -- Board
+    FONT.set(65)
+    gc.setColor(COLOR.D)
+    GC.mStr(Text.title1, board.titleW / 2, 60)
+    GC.mStr(Text.title2, board.titleW / 2, 170)
+    FONT.set(20)
+    gc.print(date, 10, board.infoH - 30)
+    if DATA.passDate then
+        gc.setColor(COLOR.G)
+        gc.print(Text.pass:format(DATA.minTick, DATA.maxTick), 80, board.infoH - 30)
+    end
+    if DATA.win > 0 then
+        gc.setColor(COLOR.DL)
+        gc.printf(DATA.win, 0, board.infoH - 30, board.titleW - 10, 'right')
+    end
+
+    -- Separator
+    gc.setColor(COLOR.D)
+    gc.setLineWidth(4)
+    gc.rectangle('line', 0, 0, board.W, board.H)
+    gc.line(board.titleW, 0, board.titleW, board.infoH)
+    gc.line(0, board.infoH, board.W, board.infoH)
+
+    gc.translate(board.titleW, 0) -- Rule
+    FONT.set(20)
+    local ruleY = 5
+    local extraY = DATA.zh and 5 or 0
+    for i = 1, #activeRules do
+        gc.setColor(ruleColor[activeRules[i]])
+        gc.draw(activeRuleTexts[i], 10, ruleY)
+        ruleY = ruleY + extraY + activeRuleTexts[i]:getHeight()
+    end
+    FONT.set(15)
+    gc.setColor(COLOR.D)
+    gc.draw(targetText, 10, board.infoH - targetText:getHeight() - 10)
+
+    gc.translate(-board.titleW, board.H - 5 * board.CH) -- Bingo
+    gc.setLineWidth(2)
+    for y = 1, 5 do
+        for x = 1, 5 do
+            local x0, y0 = (x - 1) * board.CW, (y - 1) * board.CH
+            local color = ruleMat[y][x]
+            -- if type(color) == 'table' then
+            --     color = TABLE.find(color, debugColor) and debugColor
+            -- end
+            if color then
+                gc.setColor(cellColor[color])
+                gc.rectangle('fill', x0, y0, board.CW, board.CH)
+            end
+            gc.setColor(COLOR.D)
+            gc.rectangle('line', x0, y0, board.CW, board.CH)
+
+            -- Draw Tick/Cross
+            if DATA.tickMat[y][x] > 0 then
+                gc.setColor(COLOR.L)
+                GC.mDraw(DATA.tickMat[y][x] == 1 and tick or cross, x0 + board.CW / 2, y0 + board.CH / 2)
+            end
+        end
+    end
+
+    gc.translate(0, 5 * board.CH) -- Credit
+    gc.setColor(0, 0, 0, .26)
+    gc.print(Text.credits, 0, 12)
+    gc.printf(Text.version, 0, board.W, 12, 'right')
+end
+
+scene.widgetList = {
+    WIDGET.new {
+        type = 'checkBox',
+        pos = { 1, 1 }, x = -380, y = -80, w = 40,
+        color = 'D',
+        text = LANG 'language',
+        disp = TABLE.func_getVal(DATA, 'zh'),
+        code = function()
+            DATA.zh = not DATA.zh
+            setLang(DATA.zh)
+            save()
+        end,
+    },
+    WIDGET.new {
+        type = 'checkBox',
+        pos = { 1, 1 }, x = -210, y = -80, w = 40,
+        color = 'D',
+        text = LANG 'sound',
+        disp = TABLE.func_getVal(DATA, 'sound'),
+        code = function()
+            DATA.sound = not DATA.sound
+            if DATA.sound then
+                BGM.play('naive')
+            else
+                BGM.stop()
+            end
+            save()
+        end,
+    },
+    WIDGET.new {
+        type = 'button',
+        pos = { 1, 1 }, x = -100, y = -80, w = 110, h = 60,
+        color = 'lD',
+        fontSize = 30, text = LANG 'quit',
+        code = WIDGET.c_pressKey('escape'),
+    },
+}
+SCN.add('main', scene)
+
+ZENITHA.setFirstScene('main')
+
+setLang(DATA.zh)
