@@ -392,26 +392,37 @@ function scene.mouseUp(_, _, k)
     saveTimer = 2.6
 end
 
-function scene.touchDown(x, y)
-    scene.mouseDown(x, y, 1)
+local firstTouchID
+function scene.touchDown(x, y, id)
+    if not firstTouchID then
+        firstTouchID = id
+        scene.mouseDown(x, y, 1)
+    end
 end
 
-function scene.touchMove(x, y)
-    scene.mouseMove(x, y)
+function scene.touchMove(x, y, _, _, id)
+    if id == firstTouchID then
+        scene.mouseMove(x, y)
+    end
 end
 
-function scene.touchUp(x, y)
-    scene.mouseUp(x, y, 1)
+function scene.touchUp(x, y, id)
+    if id == firstTouchID then
+        scene.mouseUp(x, y, 1)
+        firstTouchID = nil
+    end
 end
 
 function scene.update(dt)
     if holdTimer then
         holdTimer = holdTimer + dt
         if holdTimer > 0.442 then
-            local cx, cy = next(dragging):match('(%d)(%d)')
-            cx, cy = tonumber(cx), tonumber(cy)
-            scene.mouseUp(0, 0, 1)
-            DATA.tickMat[cy][cx] = DATA.tickMat[cy][cx] ~= 2 and 2 or 0
+            if next(dragging) then
+                local cx, cy = next(dragging):match('(%d)(%d)')
+                cx, cy = tonumber(cx), tonumber(cy)
+                scene.mouseUp(0, 0, 1)
+                DATA.tickMat[cy][cx] = DATA.tickMat[cy][cx] ~= 2 and 2 or 0
+            end
         end
     end
     if saveTimer then
@@ -515,7 +526,7 @@ scene.widgetList = {
         type = 'checkBox',
         pos = { 1, 1 }, x = -380, y = -80, w = 40,
         color = 'D',
-        cornerR=0,
+        cornerR = 0,
         text = LANG 'language',
         disp = TABLE.func_getVal(DATA, 'zh'),
         code = function()
@@ -528,7 +539,7 @@ scene.widgetList = {
         type = 'checkBox',
         pos = { 1, 1 }, x = -210, y = -80, w = 40,
         color = 'D',
-        cornerR=0,
+        cornerR = 0,
         text = LANG 'sound',
         disp = TABLE.func_getVal(DATA, 'sound'),
         code = function()
@@ -545,7 +556,7 @@ scene.widgetList = {
         type = 'button',
         pos = { 1, 1 }, x = -100, y = -80, w = 110, h = 60,
         color = 'lD',
-        cornerR=0,
+        cornerR = 0,
         fontSize = 30, text = LANG 'quit',
         code = WIDGET.c_pressKey('escape'),
     },
