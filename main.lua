@@ -55,7 +55,7 @@ BG.set('light')
 local function save()
     pcall(FILE.save, DATA, 'data.json', '-json')
 end
-ZENITHA.globalEvent.requestQuit=save
+ZENITHA.globalEvent.requestQuit = save
 
 
 
@@ -69,7 +69,7 @@ local ruleColor = {
     COLOR.B,
     COLOR.D,
     COLOR.G,
-    COLOR.Y,
+    {.9,.7,0},
     COLOR.O,
     COLOR.V,
     COLOR.lR,
@@ -166,7 +166,39 @@ end
 local function checkAnswer()
     correct = false
 
-    -- Check
+    -- Find Line
+    local line
+    for y = 1, 5 do
+        if TABLE.count(DATA.tickMat[y], 1) == 5 then
+            line = true
+            break
+        end
+    end
+    if not line then
+        for x = 1, 5 do
+            local count = 0
+            for y = 1, 5 do
+                if DATA.tickMat[y][x] == 1 then count = count + 1 end
+            end
+            if count == 5 then
+                line = true
+                break
+            end
+        end
+    end
+    if not line then
+        local count1, count2 = 0, 0
+        for i = 1, 5 do
+            if DATA.tickMat[i][i] == 1 then count1 = count1 + 1 end
+            if DATA.tickMat[i][6 - i] == 1 then count2 = count2 + 1 end
+        end
+        if count1 == 5 or count2 == 5 then
+            line = true
+        end
+    end
+    if not line then return end
+
+    -- Check Rules
     for y = 1, 5 do
         for x = 1, 5 do
             if ruleMat[y][x] and not checkRule(ruleMat[y][x], DATA.tickMat, x, y) then
