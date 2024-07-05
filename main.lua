@@ -95,8 +95,9 @@ local board = {
 }
 
 local debugColor
-local saveTimer
 local date
+local correct
+local saveTimer
 local activeRules = {}
 local ruleMat = {}
 local activeRuleTexts = {}
@@ -162,6 +163,8 @@ local function checkRule(rule, tickMat, x, y)
     end
 end
 local function checkAnswer()
+    correct=false
+
     -- Check
     for y = 1, 5 do
         for x = 1, 5 do
@@ -170,6 +173,8 @@ local function checkAnswer()
             end
         end
     end
+
+    correct=true
 
     -- Count ticks
     local count = 0
@@ -461,6 +466,7 @@ function scene.draw()
     GC.mStr(Text.title1, board.titleW / 2, 60)
     GC.mStr(Text.title2, board.titleW / 2, 170)
     FONT.set(20)
+    gc.setColor(correct and COLOR.G or COLOR.D)
     gc.print(date, 10, board.infoH - 30)
     if DATA.passDate then
         gc.setColor(COLOR.G)
