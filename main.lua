@@ -580,6 +580,7 @@ scene.widgetList = {
         pos = { 1, 1 }, x = -380, y = -80, w = 40,
         color = 'D',
         cornerR = 0,
+        fontSize = 25,
         text = LANG 'language',
         disp = TABLE.func_getVal(DATA, 'zh'),
         code = function()
@@ -590,9 +591,10 @@ scene.widgetList = {
     },
     WIDGET.new {
         type = 'checkBox',
-        pos = { 1, 1 }, x = -210, y = -80, w = 40,
+        pos = { 1, 1 }, x = -240, y = -80, w = 40,
         color = 'D',
         cornerR = 0,
+        fontSize = 25,
         text = LANG 'sound',
         disp = TABLE.func_getVal(DATA, 'sound'),
         code = function()
@@ -613,8 +615,367 @@ scene.widgetList = {
         fontSize = 30, text = LANG 'quit',
         code = WIDGET.c_pressKey('escape'),
     },
+    WIDGET.new {
+        type = 'button',
+        pos = { 1, 1 }, x = -180, y = -80, w = 40, h = 60,
+        color = 'lD',
+        cornerR = 0,
+        fontSize = 30, text = "?",
+        code = function()
+            SCN.go('help')
+        end,
+    },
 }
 SCN.add('main', scene)
+
+-- User670: trying to add a better help screen
+-- I'm not familiar with Love nor with Zenitha so uhhh
+-- I'll start copy pasting stuff
+local helpScene = {}
+
+local helpData={
+    {
+        l10nkey="help_intro",
+        tilemap={
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+        },
+        markmap={
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+            {1,1,1,1,1},
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+        },
+        lines={}
+    },
+    {
+        l10nkey="help_red",
+        tilemap={
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+            {0,0,1,0,0},
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+        },
+        markmap={
+            {0,0,0,0,0},
+            {0,1,0,1,0},
+            {0,1,0,0,0},
+            {0,0,0,1,0},
+            {0,0,0,0,0},
+        },
+        lines={}
+    },
+    {
+        l10nkey="help_around",
+        tilemap={
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+            {0,0,1,0,0},
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+        },
+        markmap={
+            {0,0,0,0,0},
+            {0,1,1,1,0},
+            {0,1,0,1,0},
+            {0,1,1,1,0},
+            {0,0,0,0,0},
+        },
+        lines={}
+    },
+    {
+        l10nkey="help_blue",
+        tilemap={
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+            {0,0,2,0,0},
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+        },
+        markmap={
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+            {0,0,0,1,0},
+            {0,1,0,0,0},
+            {0,0,0,0,0},
+        },
+        lines={}
+    },
+    {
+        l10nkey="help_black",
+        tilemap={
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+            {0,0,3,0,0},
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+        },
+        markmap={
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+            {0,0,1,0,0},
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+        },
+        lines={}
+    },
+    {
+        l10nkey="help_green",
+        tilemap={
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+            {0,0,4,0,0},
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+        },
+        markmap={
+            {0,0,0,0,0},
+            {0,0,1,0,0},
+            {0,0,0,0,1},
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+        },
+        lines={{2.5,0,2.5,5},{0,2.5,5,2.5}}
+    },
+    {
+        l10nkey="help_multigreen",
+        tilemap={
+            {0,0,0,0,0},
+            {0,4,0,0,0},
+            {0,0,0,0,0},
+            {0,0,0,4,0},
+            {0,0,0,0,0},
+        },
+        markmap={
+            {0,1,0,0,0},
+            {1,0,0,0,0},
+            {0,0,0,1,0},
+            {1,0,1,0,0},
+            {0,0,0,1,0},
+        },
+        lines={{1.5,0,1.5,5},{0,1.5,5,1.5},{3.5,0,3.5,5},{0,3.5,5,3.5}}
+    },
+    {
+        l10nkey="help_yellow",
+        tilemap={
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+            {0,5,0,0,0},
+            {0,0,0,0,0},
+        },
+        markmap={
+            {0,0,0,0,1},
+            {0,0,0,1,0},
+            {1,0,0,0,0},
+            {0,0,0,0,0},
+            {0,0,1,0,0},
+        },
+        lines={{0,2,3,5},{0,5,5,0}}
+    },
+    {
+        l10nkey="help_orange_purple",
+        tilemap={
+            {0,0,0,0,0},
+            {0,6,0,0,0},
+            {0,0,0,0,0},
+            {0,0,0,7,0},
+            {0,0,0,0,0},
+        },
+        markmap={
+            {0,1,1,0,0},
+            {1,0,0,0,0},
+            {1,0,0,0,1},
+            {0,0,1,0,0},
+            {0,0,0,0,1},
+        },
+        lines={}
+    },
+    {
+        l10nkey="help_pink",
+        tilemap={
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+            {0,0,8,0,0},
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+        },
+        markmap={
+            {0,0,0,0,0},
+            {0,0,2,0,0},
+            {0,2,1,2,0},
+            {0,0,2,0,0},
+            {0,0,0,0,0},
+        },
+        lines={}
+    },
+    {
+        l10nkey="help_cross",
+        tilemap={
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+        },
+        markmap={
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+            {0,0,2,0,0},
+            {0,0,0,0,0},
+            {0,0,0,0,0},
+        },
+        lines={}
+    },
+}
+
+local currentPageHelpData=helpData[1]
+local currentPageNumber=1
+
+function helpPrevPage()
+    currentPageNumber=currentPageNumber-1
+    if currentPageNumber<1 then
+        currentPageNumber=1
+    end
+    currentPageHelpData=helpData[currentPageNumber]
+end
+
+function helpNextPage()
+    currentPageNumber=currentPageNumber+1
+    if currentPageNumber>#helpData then
+        currentPageNumber=#helpData
+    end
+    currentPageHelpData=helpData[currentPageNumber]
+end
+
+function helpScene.draw()
+    gc.translate(board.X, board.Y) -- Board
+    gc.setColor(COLOR.D)
+    FONT.set(20)
+    gc.printf(LANG.getTextFunc(currentPageHelpData.l10nkey)(), 0, 120, board.titleW*2, 'center')
+    FONT.set(65)
+    gc.setColor(COLOR.D)
+    --GC.mStr(Text.title1, board.titleW / 2, 60)
+    --GC.mStr(Text.title2, board.titleW / 2, 170)
+    FONT.set(20)
+    gc.setColor(correct and COLOR.G or COLOR.D)
+    --gc.print(date, 10, board.infoH - 30)
+    if DATA.passDate then
+        gc.setColor(COLOR.G)
+        --gc.print(Text.pass:format(DATA.minTick, DATA.maxTick), 80, board.infoH - 30)
+    end
+    if DATA.win > 0 then
+        gc.setColor(COLOR.DL)
+        --gc.printf(DATA.win, 0, board.infoH - 30, board.titleW - 10, 'right')
+    end
+
+    -- Separator
+    gc.setColor(COLOR.D)
+    gc.setLineWidth(4)
+    --gc.rectangle('line', 0, 0, board.W, board.H)
+    --gc.line(board.titleW, 0, board.titleW, board.infoH)
+    --gc.line(0, board.infoH, board.W, board.infoH)
+
+    gc.translate(board.titleW, 0) -- Rule
+    FONT.set(20)
+    local ruleY = 5
+    local extraY = DATA.zh and 5 or 0
+    for i = 1, #activeRules do
+        gc.setColor(ruleColor[activeRules[i]])
+        --gc.draw(activeRuleTexts[i], 10, ruleY)
+        ruleY = ruleY + extraY + activeRuleTexts[i]:getHeight()
+    end
+    
+    
+    
+    
+    FONT.set(15)
+    gc.setColor(COLOR.D)
+    --gc.draw(targetText, 10, board.infoH - targetText:getHeight() - 10)
+
+    gc.translate(-board.titleW, board.H - 5 * board.CH) -- Bingo
+    gc.setLineWidth(2)
+    for y = 1, 5 do
+        for x = 1, 5 do
+            local x0, y0 = (x - 1) * board.CW, (y - 1) * board.CH
+            local color = currentPageHelpData.tilemap[y][x]
+            -- if type(color) == 'table' then
+            --     color = TABLE.find(color, debugColor) and debugColor
+            -- end
+            if color~=0 then
+                print(color)
+                print(cellColor[color])
+                gc.setColor(cellColor[color])
+                gc.rectangle('fill', x0, y0, board.CW, board.CH)
+            end
+            gc.setColor(COLOR.D)
+            gc.rectangle('line', x0, y0, board.CW, board.CH)
+
+            -- Draw Tick/Cross
+            if currentPageHelpData.markmap[y][x] > 0 then
+                gc.setColor(COLOR.L)
+                GC.mDraw(currentPageHelpData.markmap[y][x] == 1 and tick or cross, x0 + board.CW / 2, y0 + board.CH / 2)
+            end
+        end
+    end
+    
+    -- draw indicator lines
+    gc.setLineWidth(4)
+    for i=1, #currentPageHelpData.lines do
+        local lineColor={}
+        -- that one page that has two set of lines, special case for special colors
+        if i<=2 then
+            lineColor=COLOR.R
+        else
+            lineColor=COLOR.B
+        end
+        gc.setColor(lineColor)
+        local lineCoords=currentPageHelpData.lines[i]
+        local x0, y0 = (lineCoords[1]) * board.CW, (lineCoords[2]) * board.CH
+        local x1, y1 = (lineCoords[3]) * board.CW, (lineCoords[4]) * board.CH
+        gc.line(x0, y0, x1, y1)
+    end
+
+    gc.translate(0, 5 * board.CH) -- Credit
+    gc.setColor(0, 0, 0, .26)
+    --gc.print(Text.credits, 0, 12)
+    --gc.printf(Text.version, 0, board.W, 12, 'right')
+
+end
+
+helpScene.widgetList = {
+    WIDGET.new {
+        type = 'button',
+        pos = { 1, 1 }, x = -380, y = -80, w = 60, h = 60,
+        color = 'lD',
+        cornerR = 0,
+        fontSize = 30, text = "<",
+        code = helpPrevPage,
+    },
+    WIDGET.new {
+        type = 'button',
+        pos = { 1, 1 }, x = -280, y = -80, w = 60, h = 60,
+        color = 'lD',
+        cornerR = 0,
+        fontSize = 30, text = ">",
+        code = helpNextPage,
+    },
+    WIDGET.new {
+        type = 'button',
+        pos = { 1, 1 }, x = -100, y = -80, w = 110, h = 60,
+        color = 'lD',
+        cornerR = 0,
+        fontSize = 30, text = LANG('help_back'),
+        code = WIDGET.c_pressKey('escape'),
+    },
+}
+
+SCN.add('help', helpScene)
 
 ZENITHA.setFirstScene('main')
 

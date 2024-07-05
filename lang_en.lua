@@ -21,4 +21,17 @@ return {
     sound = "Sound",
     language = "文/A",
     quit = "Quit",
+    
+    help_intro="Welcome to Smart Bingo!\nThe goal of the game is to connect 5 ticks in a row, column, or long diagonal while satisfying all additional rules.",
+    help_red="A red tile requires that tiles \"around\" it contains at least one tick.",
+    help_around="\"Around\" means the 8 tiles next to the tile within a 3 by 3 area. The color tile itself is not included.\nThis definition also applies to a few other rules.",
+    help_blue="A blue tile requires that tiles \"around\" it contains at most two ticks.",
+    help_black="A black tile must be ticked.",
+    help_green="For a green tile, its row and column must have the same number of ticks on them.",
+    help_multigreen="When there are multiple green tiles, each tile's own row and column must have the same number. Different tiles' rows and columns do not have to match.",
+    help_yellow="For a yellow tile, the two diagonal lines through it must have the same number of ticks on them, even if the two lines are of different length.\nWhen there are multiple yellow tiles, the rules are similar to that of green tiles.",
+    help_orange_purple="An orange tile requires an even number of ticks \"around\" it (zero is also an even number), while a purple title requires an odd number.",
+    help_pink="If a pink tile is ticked, then the 4 tiles directly adjacent to it must not be ticked. There are no further restrictions if a pink tile is not ticked.",
+    help_cross="Press and hold, or right click on the mouse, to place a cross. Press and hold again or right click again to remove it.",
+    help_back="Back",
 }
