@@ -55,6 +55,7 @@ BG.set('light')
 local function save()
     pcall(FILE.save, DATA, 'data.json', '-json')
 end
+ZENITHA.globalEvent.requestQuit=save
 
 
 
@@ -163,7 +164,7 @@ local function checkRule(rule, tickMat, x, y)
     end
 end
 local function checkAnswer()
-    correct=false
+    correct = false
 
     -- Check
     for y = 1, 5 do
@@ -174,7 +175,7 @@ local function checkAnswer()
         end
     end
 
-    correct=true
+    correct = true
 
     -- Count ticks
     local count = 0
@@ -325,16 +326,14 @@ function scene.load()
             ruleMat[targetCell[2]][targetCell[1]] = rule
         end
     end
+
+    checkAnswer()
 end
 
 function scene.keyDown(k, rep)
     if rep then return end
-    if k == 'escape' then
-        ZENITHA._quit('fade')
-    end
-    if tonumber(k) then
-        debugColor = tonumber(k)
-    end
+    if tonumber(k) then debugColor = tonumber(k) end
+    if k == 'escape' then ZENITHA._quit('fade') end
     return true
 end
 
