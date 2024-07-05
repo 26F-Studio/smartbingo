@@ -371,8 +371,17 @@ end
 
 function scene.keyDown(k, rep)
     if rep then return end
-    if tonumber(k) then debugColor = tonumber(k) end
-    if k == 'escape' then saveTimer=0 ZENITHA._quit('fade') end
+    -- if tonumber(k) then debugColor = tonumber(k) end
+    if k == 'escape' then
+        saveTimer = 0
+        ZENITHA._quit('fade')
+    elseif k == 'backspace' or k == 'delete' then
+        for y = 1, 5 do
+            for x = 1, 5 do
+                DATA.tickMat[y][x] = 0
+            end
+        end
+    end
     return true
 end
 
