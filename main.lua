@@ -52,11 +52,6 @@ local bgColor = { COLOR.HEX 'EDEDED' }
 BG.add('light', { draw = function() GC.clear(bgColor) end })
 BG.set('light')
 
-local function save()
-    pcall(FILE.save, DATA, 'data.json', '-json')
-end
-ZENITHA.globalEvent.requestQuit = save
-
 
 
 
@@ -69,7 +64,7 @@ local ruleColor = {
     COLOR.B,
     COLOR.D,
     COLOR.G,
-    {.9,.7,0},
+    { .9, .7, 0 },
     COLOR.O,
     COLOR.V,
     COLOR.lR,
@@ -237,7 +232,7 @@ local function checkAnswer()
     end
     if needSave then
         SFX.play('solve')
-        save()
+        saveTimer = 0
     end
 end
 
@@ -365,7 +360,7 @@ end
 function scene.keyDown(k, rep)
     if rep then return end
     if tonumber(k) then debugColor = tonumber(k) end
-    if k == 'escape' then ZENITHA._quit('fade') end
+    if k == 'escape' then saveTimer=0 ZENITHA._quit('fade') end
     return true
 end
 
@@ -463,8 +458,8 @@ function scene.update(dt)
     end
     if saveTimer then
         saveTimer = saveTimer - dt
-        if saveTimer < 0 then
-            save()
+        if saveTimer <= 0 then
+            pcall(FILE.save, DATA, 'data.json', '-json')
             saveTimer = nil
         end
     end
@@ -569,7 +564,7 @@ scene.widgetList = {
         code = function()
             DATA.zh = not DATA.zh
             setLang(DATA.zh)
-            save()
+            saveTimer = 1.26
         end,
     },
     WIDGET.new {
@@ -586,7 +581,7 @@ scene.widgetList = {
             else
                 BGM.stop()
             end
-            save()
+            saveTimer = 1.26
         end,
     },
     WIDGET.new {

@@ -8,8 +8,8 @@
 
 除了原版内容，还加入了更多的颜色以及最多/最少勾数挑战
 
-下载：滚轮往上滚一些，右侧有一个“Releases”的标签，点进去就可以下载最新的Win64和安卓版本
-
-注意电脑版需要解压zip，你一定会的对吧对吧对吧对吧！
+下载（就是最新Release）：
+[Windows电脑](https://github.com/26F-Studio/smartbingo/releases/latest/download/SmartBingo_Win64.zip)
+[安卓手机](https://github.com/26F-Studio/smartbingo/releases/latest/download/SmartBingo_Android.apk)
 
 ~~最后 Techmino好玩~~
