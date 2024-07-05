@@ -239,9 +239,21 @@ end
 ---@type Zenitha.Scene
 local scene = {}
 
+local rnd = math.random
+local function seed(n)
+    math.randomseed(os.date('!%Y') * 366 + os.date('!%j'))
+    for _ = 1, n do rnd() end
+end
 function scene.load()
     -- Fresh date
     date = os.date('!%y%m%d')
+    if date <= '240705' then
+        seed = function(n)
+            if n == 26 then
+                math.randomseed(os.date('!%Y') * 366 + os.date('!%j'))
+            end
+        end
+    end
     if DATA.passDate ~= date then
         DATA.passDate = false
         DATA.maxTick = false
@@ -251,20 +263,19 @@ function scene.load()
         end
     end
 
-    -- Seed
-    math.randomseed(os.date('!%Y') * 366 + os.date('!%j'))
-
     -- Rules
+    seed(26)
     activeRules = { 1, 2, 3, 4 }
     local extraRules = { 5, 6, 7, 8 }
     for _ = 1, MATH.randFreq { 60, 30, 10 } do
-        ins(activeRules, rem(extraRules, math.random(1, #extraRules)))
+        ins(activeRules, rem(extraRules, rnd(1, #extraRules)))
     end
 
     -- Tick matrix
+    seed(35.5)
     local tickMat = {}
     for i = 1, 5 do tickMat[i] = TABLE.new(0, 5) end
-    local lineNo = math.random(1, 12) -- Target Line
+    local lineNo = rnd(1, 12) -- Target Line
     if lineNo <= 5 then
         for i = 1, 5 do tickMat[lineNo][i] = 1 end
     elseif lineNo <= 10 then
@@ -274,10 +285,10 @@ function scene.load()
     elseif lineNo == 12 then
         for i = 1, 5 do tickMat[i][6 - i] = 1 end
     end
-    for _ = 1, math.random(3, 6) do -- Random
+    for _ = 1, rnd(3, 6) do -- Random
         local rx, ry
         repeat
-            rx, ry = math.random(1, 5), math.random(1, 5)
+            rx, ry = rnd(1, 5), rnd(1, 5)
         until tickMat[ry][rx] == 0
         tickMat[ry][rx] = 1
     end
@@ -322,6 +333,7 @@ function scene.load()
     end
 
     -- Color
+    seed(42)
     ruleMat = {}
     for i = 1, 5 do ruleMat[i] = TABLE.new(false, 5) end
     -- for y = 1, 5 do
@@ -329,7 +341,7 @@ function scene.load()
     --         ruleMat[y][x] = pbMat[y][x]
     --     end
     -- end
-    for i = 1, math.random(10, 18) do
+    for i = 1, rnd(8, 15) do
         local rule = existRule[i % #existRule + 1]
         local pbBlankCells = {}
         local pbCells = {}
@@ -345,9 +357,9 @@ function scene.load()
         end
         local targetCell
         if #pbBlankCells > 0 then
-            targetCell = pbBlankCells[math.random(#pbBlankCells)]
+            targetCell = pbBlankCells[rnd(#pbBlankCells)]
         else
-            targetCell = pbCells[math.random(#pbCells)]
+            targetCell = pbCells[rnd(#pbCells)]
         end
         if targetCell then
             ruleMat[targetCell[2]][targetCell[1]] = rule
