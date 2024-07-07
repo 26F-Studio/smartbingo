@@ -8,9 +8,9 @@ require 'Zenitha'
 
 SCR.setSize(500, 1000)
 
-ZENITHA.setMaxFPS(120)
+ZENITHA.setMaxFPS(100)
 ZENITHA.setUpdateFreq(100)
-ZENITHA.setDrawFreq(25)
+ZENITHA.setDrawFreq(26)
 ZENITHA.globalEvent.drawCursor = NULL
 
 LANG.add {
@@ -92,7 +92,7 @@ local board = {
 
 local titleColor = { 0, 0, 0 }
 local titleClick = 0
-local debugColor
+-- local debugColor
 local date
 local correct
 local saveTimer
@@ -121,7 +121,29 @@ local function safeGet(t, x, y)
     if t[y] then return t[y][x] end
     return 0
 end
-local function checkRule(rule, tickMat, x, y)
+local function checkLine()
+    for y = 1, 5 do
+        if TABLE.count(DATA.tickMat[y], 1) == 5 then
+            return true
+        end
+    end
+    for x = 1, 5 do
+        local count = 0
+        for y = 1, 5 do
+            if DATA.tickMat[y][x] == 1 then count = count + 1 end
+        end
+        if count == 5 then
+            return true
+        end
+    end
+    local count1, count2 = 0, 0
+    for i = 1, 5 do
+        if DATA.tickMat[i][i] == 1 then count1 = count1 + 1 end
+        if DATA.tickMat[i][6 - i] == 1 then count2 = count2 + 1 end
+    end
+    return count1 == 5 or count2 == 5
+end
+local function checkCell(rule, tickMat, x, y)
     if rule == 1 or rule == 2 or rule == 6 or rule == 7 then
         local count = 0
         for _x = x - 1, x + 1 do
@@ -164,41 +186,13 @@ local function checkAnswer()
     correct = false
 
     -- Find Line
-    local line
-    for y = 1, 5 do
-        if TABLE.count(DATA.tickMat[y], 1) == 5 then
-            line = true
-            break
-        end
-    end
-    if not line then
-        for x = 1, 5 do
-            local count = 0
-            for y = 1, 5 do
-                if DATA.tickMat[y][x] == 1 then count = count + 1 end
-            end
-            if count == 5 then
-                line = true
-                break
-            end
-        end
-    end
-    if not line then
-        local count1, count2 = 0, 0
-        for i = 1, 5 do
-            if DATA.tickMat[i][i] == 1 then count1 = count1 + 1 end
-            if DATA.tickMat[i][6 - i] == 1 then count2 = count2 + 1 end
-        end
-        if count1 == 5 or count2 == 5 then
-            line = true
-        end
-    end
-    if not line then return end
+
+    if not checkLine() then return end
 
     -- Check Rules
     for y = 1, 5 do
         for x = 1, 5 do
-            if ruleMat[y][x] and not checkRule(ruleMat[y][x], DATA.tickMat, x, y) then
+            if ruleMat[y][x] and not checkCell(ruleMat[y][x], DATA.tickMat, x, y) then
                 return
             end
         end
@@ -235,6 +229,52 @@ local function checkAnswer()
     if needSave then
         SFX.play('solve')
         saveTimer = 0
+    end
+end
+
+local function showText(text)
+    for textDX = -4, 4, 8 do
+        for textDY = -4, 4, 8 do
+            TEXT:add { text = text, x = 250 + textDX, y = 580 + textDY, color = 'D', fontSize = 200, duration = 2.6, style = 'score', inPoint = .026, outPoint = .042 }
+        end
+    end
+    TEXT:add { text = text, x = 250, y = 580, color = 'L', fontSize = 200, duration = 2.6, style = 'score', inPoint = .026, outPoint = .042 }
+end
+local function triggerHint()
+    if not checkLine() then
+        TEXT:clear()
+        TWEEN.new():setOnRepeat(function(n)
+            local x0, y0 = board.X, board.Y + board.infoH
+            local dx, dy = board.CW, board.CH
+            if n <= 5 then
+                SYSFX.line(.4, x0 + dx * .2, y0 + dy * (n - .5), x0 + dx * 4.8, y0 + dy * (n - .5), 26, 0, 0, 0, .626)
+                SYSFX.line(.42, x0 + dx * .2 + 3, y0 + dy * (n - .5), x0 + dx * 4.8 - 3, y0 + dy * (n - .5), 20)
+            elseif n <= 10 then
+                n = n - 5
+                SYSFX.line(.4, x0 + dx * (n - .5), y0 + dy * .2, x0 + dx * (n - .5), y0 + dy * 4.8, 26, 0, 0, 0, .626)
+                SYSFX.line(.42, x0 + dx * (n - .5), y0 + dy * .2 + 3, x0 + dx * (n - .5), y0 + dy * 4.8 - 3, 20)
+            elseif n == 11 then
+                SYSFX.line(.4, x0 + dx * .2, y0 + dy * .2, x0 + dx * 4.8, y0 + dy * 4.8, 26, 0, 0, 0, .626)
+                SYSFX.line(.42, x0 + dx * .2 + 2, y0 + dy * .2 + 2, x0 + dx * 4.8 - 2, y0 + dy * 4.8 - 2, 20)
+            elseif n == 12 then
+                SYSFX.line(.4, x0 + dx * 4.8, y0 + dy * .2, x0 + dx * .2, y0 + dy * 4.8, 26, 0, 0, 0, .626)
+                SYSFX.line(.42, x0 + dx * 4.8 - 2, y0 + dy * .2 + 2, x0 + dx * .2 + 2, y0 + dy * 4.8 - 2, 20)
+            elseif n == 13 then
+                showText("?")
+            end
+        end):setDuration(0.126):setLoop('repeat', 14):setUnique('hint_noLine'):run()
+    else
+        TWEEN.new():setUnique('hint_noLine'):setDuration(0):run()
+        -- Check Rules
+        for cy = 1, 5 do
+            for cx = 1, 5 do
+                if ruleMat[cy][cx] and not checkCell(ruleMat[cy][cx], DATA.tickMat, cx, cy) then
+                    SYSFX.rect(.4, board.X + (cx - 1) * board.CW + 6, board.Y + board.infoH + (cy - 1) * board.CH + 6,
+                        board.CW - 12,
+                        board.CH - 12, 0, 1, 1, 1.626)
+                end
+            end
+        end
     end
 end
 
@@ -311,7 +351,7 @@ function scene.load()
             pbMat[y][x] = {}
             for r = 1, #activeRules do
                 local rule = activeRules[r]
-                if checkRule(rule, tickMat, x, y) then
+                if checkCell(rule, tickMat, x, y) then
                     ins(pbMat[y][x], rule)
                     ruleCount[rule] = ruleCount[rule] + 1
                 end
@@ -383,13 +423,15 @@ function scene.keyDown(k, rep)
                 DATA.tickMat[y][x] = 0
             end
         end
+    elseif k == 'h' then
+        triggerHint()
     end
     return true
 end
 
 local function getBoardPos(x, y)
     local cx = math.floor((x - board.X) / board.CW + 1)
-    local cy = math.floor((y - (board.Y + board.H - board.CH * 5)) / board.CH + 1)
+    local cy = math.floor((y - (board.Y + board.infoH)) / board.CH + 1)
     return MATH.clamp(cx, 1, 5), MATH.clamp(cy, 1, 5)
 end
 
@@ -397,24 +439,24 @@ local holdTimer
 local dragging
 local dragStart
 function scene.mouseDown(x, y, k)
-    if titleClick < 26 and MATH.between(x, board.X, board.X + board.titleW) and MATH.between(y, board.Y, board.Y + board.infoH) then
+    if MATH.between(x, board.X, board.X + board.titleW) and MATH.between(y, board.Y, board.Y + board.infoH) then
+        if titleClick >= 26 then return end
         local origColor
         repeat
             origColor = ruleColor[activeRules[rnd(#activeRules)]]
         until origColor[1] ~= 0
         titleColor = TABLE.copy(origColor)
-        TWEEN.tag_kill('titleColorTransition')
         TWEEN.new(function(t)
             titleColor[1] = MATH.lerp(origColor[1], 0, t)
             titleColor[2] = MATH.lerp(origColor[2], 0, t)
             titleColor[3] = MATH.lerp(origColor[3], 0, t)
-        end):setDuration(0.26):setTag('titleColorTransition'):run()
+        end):setDuration(0.26):setUnique('titleColorTransition'):run()
         titleClick = titleClick + 1
         if titleClick == 26 then
             MSG.new('info', Text.egg_clickTitle, 4.2)
         end
     elseif MATH.between(x, board.X + board.titleW, board.X + board.W) and MATH.between(y, board.Y, board.Y + board.infoH) then
-        -- Hint
+        triggerHint()
     else
         if k == 1 then
             holdTimer = 0
@@ -529,7 +571,20 @@ local cross = GC.load { 62, 62,
     { 'line',  2,      50, 50, 2 },
 }
 function scene.draw()
-    gc.translate(board.X, board.Y) -- Board
+    gc.translate(board.X, board.Y)
+
+    -- Board & Separator
+    gc.setColor(COLOR.D)
+    gc.setLineWidth(4)
+    gc.rectangle('line', 0, 0, board.W, board.H)
+    gc.line(board.titleW, 0, board.titleW, board.infoH)
+    gc.line(0, board.infoH, board.W, board.infoH)
+    gc.setLineWidth(2)
+    gc.rectangle('line', board.W - 12, 12, -26, 26)
+    FONT.set(30)
+    gc.print('?', board.W - 32, 8)
+
+    -- Title
     FONT.set(65)
     gc.setColor(titleColor)
     GC.mStr(Text.title1, board.titleW / 2, 60)
@@ -546,14 +601,8 @@ function scene.draw()
         gc.printf(DATA.win, 0, board.infoH - 30, board.titleW - 10, 'right')
     end
 
-    -- Separator
-    gc.setColor(COLOR.D)
-    gc.setLineWidth(4)
-    gc.rectangle('line', 0, 0, board.W, board.H)
-    gc.line(board.titleW, 0, board.titleW, board.infoH)
-    gc.line(0, board.infoH, board.W, board.infoH)
-
-    gc.translate(board.titleW, 0) -- Rule
+    -- Rule
+    gc.translate(board.titleW, 0)
     FONT.set(40)
     gc.print(Text.rule, 10, DATA.zh and 10 or 5)
     FONT.set(20)
@@ -568,7 +617,8 @@ function scene.draw()
     gc.setColor(COLOR.D)
     gc.draw(targetText, 10, board.infoH - targetText:getHeight() - 10)
 
-    gc.translate(-board.titleW, board.H - 5 * board.CH) -- Bingo
+    -- Bingo
+    gc.translate(-board.titleW, board.infoH)
     gc.setLineWidth(2)
     for y = 1, 5 do
         for x = 1, 5 do
