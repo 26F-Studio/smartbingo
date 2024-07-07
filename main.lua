@@ -62,7 +62,7 @@ local ins, rem = table.insert, table.remove
 local ruleColor = {
     COLOR.R,
     COLOR.B,
-    COLOR.D,
+    { 0,  0,  0 },
     COLOR.G,
     { .9, .7, 0 },
     COLOR.O,
@@ -90,6 +90,8 @@ local board = {
     CH = 100,
 }
 
+local titleColor = { 0, 0, 0 }
+local titleClick = 0
 local debugColor
 local date
 local correct
@@ -395,20 +397,40 @@ local holdTimer
 local dragging
 local dragStart
 function scene.mouseDown(x, y, k)
-    if k == 1 then
-        holdTimer = 0
-        dragging = {}
-        scene.mouseMove(x, y)
-    elseif k == 2 then
-        if dragging then
-            for xy in next, dragging do
-                local cx, cy = xy:match('(%d)(%d)')
-                cx, cy = tonumber(cx), tonumber(cy)
-                DATA.tickMat[cy][cx] = dragStart
+    if titleClick < 26 and MATH.between(x, board.X, board.X + board.titleW) and MATH.between(y, board.Y, board.Y + board.infoH) then
+        local origColor
+        repeat
+            origColor = ruleColor[activeRules[rnd(#activeRules)]]
+        until origColor[1] ~= 0
+        titleColor = TABLE.copy(origColor)
+        TWEEN.tag_kill('titleColorTransition')
+        TWEEN.new(function(t)
+            titleColor[1] = MATH.lerp(origColor[1], 0, t)
+            titleColor[2] = MATH.lerp(origColor[2], 0, t)
+            titleColor[3] = MATH.lerp(origColor[3], 0, t)
+        end):setDuration(0.26):setTag('titleColorTransition'):run()
+        titleClick = titleClick + 1
+        if titleClick == 26 then
+            MSG.new('info', Text.egg_clickTitle, 4.2)
+        end
+    elseif MATH.between(x, board.X + board.titleW, board.X + board.W) and MATH.between(y, board.Y, board.Y + board.infoH) then
+        -- Hint
+    else
+        if k == 1 then
+            holdTimer = 0
+            dragging = {}
+            scene.mouseMove(x, y)
+        elseif k == 2 then
+            if dragging then
+                for xy in next, dragging do
+                    local cx, cy = xy:match('(%d)(%d)')
+                    cx, cy = tonumber(cx), tonumber(cy)
+                    DATA.tickMat[cy][cx] = dragStart
+                end
+            elseif MATH.between(x, board.X, board.X + board.W) and MATH.between(y, board.Y + board.infoH, board.Y + board.H) then
+                local cx, cy = getBoardPos(x, y)
+                DATA.tickMat[cy][cx] = DATA.tickMat[cy][cx] == 0 and 2 or 0
             end
-        elseif MATH.between(x, board.X, board.X + board.W) and MATH.between(y, board.Y + board.infoH, board.Y + board.H) then
-            local cx, cy = getBoardPos(x, y)
-            DATA.tickMat[cy][cx] = DATA.tickMat[cy][cx] == 0 and 2 or 0
         end
     end
 end
@@ -509,7 +531,7 @@ local cross = GC.load { 62, 62,
 function scene.draw()
     gc.translate(board.X, board.Y) -- Board
     FONT.set(65)
-    gc.setColor(COLOR.D)
+    gc.setColor(titleColor)
     GC.mStr(Text.title1, board.titleW / 2, 60)
     GC.mStr(Text.title2, board.titleW / 2, 170)
     FONT.set(20)
@@ -532,8 +554,10 @@ function scene.draw()
     gc.line(0, board.infoH, board.W, board.infoH)
 
     gc.translate(board.titleW, 0) -- Rule
+    FONT.set(40)
+    gc.print(Text.rule, 10, DATA.zh and 10 or 5)
     FONT.set(20)
-    local ruleY = 5
+    local ruleY = DATA.zh and 62 or 42
     local extraY = DATA.zh and 5 or 0
     for i = 1, #activeRules do
         gc.setColor(ruleColor[activeRules[i]])

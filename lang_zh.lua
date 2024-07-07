@@ -1,6 +1,7 @@
 return {
     title1 = "聪明宾",
     title2 = "果游戏",
+    rule = "规则",
     rules = {
         "红色周围至少勾一个",
         "蓝色周围最多勾两个",
@@ -13,12 +14,14 @@ return {
     },
     pass = "完成(%d-%d)",
     target = "五个勾连成直线证明你不是智障",
-    winDaily="每日谜题解决！ 你不是智障！",
-    winMax="新的最多勾数纪录！",
-    winMin="新的最少勾数纪录！",
+    winDaily = "每日谜题解决！ 你不是智障！",
+    winMax = "新的最多勾数纪录！",
+    winMin = "新的最少勾数纪录！",
     credits = "26F Studio 制作    创意来自QQ群图片",
     version = "1.0",
     sound = "声音",
     language = "文/A",
     quit = "退出",
+
+    egg_clickTitle = "你在干什么？",
 }
