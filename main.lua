@@ -580,9 +580,9 @@ function scene.draw()
     gc.line(board.titleW, 0, board.titleW, board.infoH)
     gc.line(0, board.infoH, board.W, board.infoH)
     gc.setLineWidth(2)
-    gc.rectangle('line', board.W - 12, 12, -26, 26)
-    FONT.set(30)
-    gc.print('?', board.W - 32, 8)
+    gc.rectangle('line', board.W - 7, 8, -73, 32)
+    FONT.set(25)
+    GC.mStr(Text.check, board.W - 42, 12)
 
     -- Title
     FONT.set(65)

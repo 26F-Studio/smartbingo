@@ -1,7 +1,9 @@
 return {
     title1 = "Smart",
     title2 = "Bingo",
+    pass = "PASS(%d-%d)",
     rule = "Rules",
+    check = "Check",
     rules = {
         "Red: ≥1 tick around",
         "Blue: ≤2 ticks around",
@@ -12,7 +14,6 @@ return {
         "Purple: ODD num of ticks around",
         "Pink: tick on this color must be ISOLATE"
     },
-    pass = "PASS(%d-%d)",
     target = "Tick five in line to prove you are not ⑨",
     winDaily = "Daily puzzle solved!\nYou are not ⑨!",
     winMax = "New maximal ticks!",
