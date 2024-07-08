@@ -651,7 +651,7 @@ end
 scene.widgetList = {
     WIDGET.new {
         type = 'checkBox',
-        pos = { 1, 1 }, x = -380, y = -80, w = 40,
+        pos = { 1, 1 }, x = -250, y = -80, w = 40,
         color = 'D',
         cornerR = 0,
         text = LANG 'language',
@@ -664,7 +664,7 @@ scene.widgetList = {
     },
     WIDGET.new {
         type = 'checkBox',
-        pos = { 1, 1 }, x = -210, y = -80, w = 40,
+        pos = { 1, 1 }, x = -80, y = -80, w = 40,
         color = 'D',
         cornerR = 0,
         text = LANG 'sound',
@@ -678,14 +678,6 @@ scene.widgetList = {
             end
             saveTimer = 1.26
         end,
-    },
-    WIDGET.new {
-        type = 'button',
-        pos = { 1, 1 }, x = -100, y = -80, w = 110, h = 60,
-        color = 'lD',
-        cornerR = 0,
-        fontSize = 30, text = LANG 'quit',
-        code = WIDGET.c_pressKey('escape'),
     },
 }
 SCN.add('main', scene)
