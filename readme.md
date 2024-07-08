@@ -8,6 +8,10 @@
 
 除了原版内容，还加入了更多的颜色以及最多/最少勾数挑战
 
+注1：安卓平台有个小bug，通过桌面图标启动时必须保证后台里没有正在运行，否则点图标也打不开（唉好多年的bug了他也没修）
+
+注2：本仓库疑似被一些无良发行商盯上了，如果star本仓库且你的github个人资料写了邮箱就可能会收到推销邮件，敬请注意（得到了敌人的认可，好！（不是
+
 下载（就是最新Release）：
 [Windows电脑](https://github.com/26F-Studio/smartbingo/releases/latest/download/SmartBingo_Win64.zip)
 [安卓手机](https://github.com/26F-Studio/smartbingo/releases/latest/download/SmartBingo_Android.apk)
