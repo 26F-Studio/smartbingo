@@ -241,41 +241,45 @@ local function showText(text)
     TEXT:add { text = text, x = 250, y = 580, color = 'L', fontSize = 200, duration = 2.6, style = 'score', inPoint = .026, outPoint = .042 }
 end
 local function triggerHint()
-    if not checkLine() then
-        TEXT:clear()
-        TWEEN.new():setOnRepeat(function(n)
-            local x0, y0 = board.X, board.Y + board.infoH
-            local dx, dy = board.CW, board.CH
-            if n <= 5 then
-                SYSFX.line(.4, x0 + dx * .2, y0 + dy * (n - .5), x0 + dx * 4.8, y0 + dy * (n - .5), 26, 0, 0, 0, .626)
-                SYSFX.line(.42, x0 + dx * .2 + 3, y0 + dy * (n - .5), x0 + dx * 4.8 - 3, y0 + dy * (n - .5), 20)
-            elseif n <= 10 then
-                n = n - 5
-                SYSFX.line(.4, x0 + dx * (n - .5), y0 + dy * .2, x0 + dx * (n - .5), y0 + dy * 4.8, 26, 0, 0, 0, .626)
-                SYSFX.line(.42, x0 + dx * (n - .5), y0 + dy * .2 + 3, x0 + dx * (n - .5), y0 + dy * 4.8 - 3, 20)
-            elseif n == 11 then
-                SYSFX.line(.4, x0 + dx * .2, y0 + dy * .2, x0 + dx * 4.8, y0 + dy * 4.8, 26, 0, 0, 0, .626)
-                SYSFX.line(.42, x0 + dx * .2 + 2, y0 + dy * .2 + 2, x0 + dx * 4.8 - 2, y0 + dy * 4.8 - 2, 20)
-            elseif n == 12 then
-                SYSFX.line(.4, x0 + dx * 4.8, y0 + dy * .2, x0 + dx * .2, y0 + dy * 4.8, 26, 0, 0, 0, .626)
-                SYSFX.line(.42, x0 + dx * 4.8 - 2, y0 + dy * .2 + 2, x0 + dx * .2 + 2, y0 + dy * 4.8 - 2, 20)
-            elseif n == 13 then
-                showText("?")
-            end
-        end):setDuration(0.126):setLoop('repeat', 14):setUnique('hint_noLine'):run()
-    else
-        TWEEN.new():setUnique('hint_noLine'):setDuration(0):run()
-        -- Check Rules
-        for cy = 1, 5 do
-            for cx = 1, 5 do
-                if ruleMat[cy][cx] and not checkCell(ruleMat[cy][cx], DATA.tickMat, cx, cy) then
-                    SYSFX.rect(.4, board.X + (cx - 1) * board.CW + 6, board.Y + board.infoH + (cy - 1) * board.CH + 6,
-                        board.CW - 12,
-                        board.CH - 12, 0, 1, 1, 1.626)
-                end
+    TEXT:clear()
+    TWEEN.new():setUnique('hint_noLine'):setDuration(0):run()
+
+    -- Check Rules
+    local fault
+    for cy = 1, 5 do
+        for cx = 1, 5 do
+            if ruleMat[cy][cx] and not checkCell(ruleMat[cy][cx], DATA.tickMat, cx, cy) then
+                fault = true
+                SYSFX.rect(.4, board.X + (cx - 1) * board.CW + 6, board.Y + board.infoH + (cy - 1) * board.CH + 6,
+                    board.CW - 12,
+                    board.CH - 12, 0, 1, 1, 1.626)
             end
         end
     end
+    if fault then return end
+
+    -- Check line
+    if checkLine() then return end
+    TWEEN.new():setOnRepeat(function(n)
+        local x0, y0 = board.X, board.Y + board.infoH
+        local dx, dy = board.CW, board.CH
+        if n <= 5 then
+            SYSFX.line(.4, x0 + dx * .2, y0 + dy * (n - .5), x0 + dx * 4.8, y0 + dy * (n - .5), 26, 0, 0, 0, .626)
+            SYSFX.line(.42, x0 + dx * .2 + 3, y0 + dy * (n - .5), x0 + dx * 4.8 - 3, y0 + dy * (n - .5), 20)
+        elseif n <= 10 then
+            n = n - 5
+            SYSFX.line(.4, x0 + dx * (n - .5), y0 + dy * .2, x0 + dx * (n - .5), y0 + dy * 4.8, 26, 0, 0, 0, .626)
+            SYSFX.line(.42, x0 + dx * (n - .5), y0 + dy * .2 + 3, x0 + dx * (n - .5), y0 + dy * 4.8 - 3, 20)
+        elseif n == 11 then
+            SYSFX.line(.4, x0 + dx * .2, y0 + dy * .2, x0 + dx * 4.8, y0 + dy * 4.8, 26, 0, 0, 0, .626)
+            SYSFX.line(.42, x0 + dx * .2 + 2, y0 + dy * .2 + 2, x0 + dx * 4.8 - 2, y0 + dy * 4.8 - 2, 20)
+        elseif n == 12 then
+            SYSFX.line(.4, x0 + dx * 4.8, y0 + dy * .2, x0 + dx * .2, y0 + dy * 4.8, 26, 0, 0, 0, .626)
+            SYSFX.line(.42, x0 + dx * 4.8 - 2, y0 + dy * .2 + 2, x0 + dx * .2 + 2, y0 + dy * 4.8 - 2, 20)
+        elseif n == 13 then
+            showText("?")
+        end
+    end):setDuration(0.126):setLoop('repeat', 14):setUnique('hint_noLine'):run()
 end
 
 ---@type Zenitha.Scene
