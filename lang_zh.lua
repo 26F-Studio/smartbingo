@@ -16,13 +16,11 @@ return {
     },
     target = "五个勾连成直线证明你不是智障",
     winDaily = "每日谜题解决！ 你不是智障！",
+    winAny = "谜题解决！",
     winMax = "新的最多勾数纪录！",
     winMin = "新的最少勾数纪录！",
     credits = "26F Studio 制作    创意来自QQ群图片",
-    version = "1.0",
+    version = "V1.5",
     sound = "声音",
     language = "文/A",
-    quit = "退出",
-
-    egg_clickTitle = "你在干什么？",
 }

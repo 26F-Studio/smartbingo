@@ -11,6 +11,7 @@ SCR.setSize(500, 1000)
 ZENITHA.setMaxFPS(100)
 ZENITHA.setUpdateFreq(100)
 ZENITHA.setDrawFreq(26)
+ZENITHA.setVersionText('')
 ZENITHA.globalEvent.drawCursor = NULL
 
 LANG.add {
@@ -56,8 +57,9 @@ BG.set('light')
 
 
 
-local gc = love.graphics
+local rnd = math.random
 local ins, rem = table.insert, table.remove
+local gc = love.graphics
 
 local ruleColor = {
     COLOR.R,
@@ -91,15 +93,22 @@ local board = {
 }
 
 local titleColor = { 0, 0, 0 }
-local titleClick = 0
 -- local debugColor
-local date
+local today ---@type boolean only save on today
+local date = os.date('!%y%m%d')
 local correct
 local saveTimer
 local activeRules = {}
 local ruleMat = {}
 local activeRuleTexts = {}
 local targetText = gc.newText(FONT.get(15))
+
+local egg = {
+    AD_BC = false,
+    back_to_future = false,
+    bingo_clicker = 0,
+    bingo_target = 1,
+}
 
 local function freshRuleText()
     activeRuleTexts = {}
@@ -231,18 +240,138 @@ local function checkAnswer()
         saveTimer = 0
     end
 end
+local function dumpGrid(t)
+    local n = 0
+    for y = 1, 5 do
+        for x = 1, 5 do
+            if t[y][x] == 1 then
+                n = n + 2 ^ (5 * (y - 1) + x - 1)
+            end
+        end
+    end
+    return n
+end
+local gridConst = {
+    left = dumpGrid {
+        { 0, 0, 1, 0, 0 },
+        { 0, 1, 0, 0, 0 },
+        { 1, 1, 1, 1, 1 },
+        { 0, 1, 0, 0, 0 },
+        { 0, 0, 1, 0, 0 },
+    },
+    right = dumpGrid {
+        { 0, 0, 1, 0, 0 },
+        { 0, 0, 0, 1, 0 },
+        { 1, 1, 1, 1, 1 },
+        { 0, 0, 0, 1, 0 },
+        { 0, 0, 1, 0, 0 },
+    },
+    N = dumpGrid {
+        { 1, 0, 0, 0, 1 },
+        { 1, 1, 0, 0, 1 },
+        { 1, 0, 1, 0, 1 },
+        { 1, 0, 0, 1, 1 },
+        { 1, 0, 0, 0, 1 },
+    },
+    R = dumpGrid {
+        { 1, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 1, 1, 1, 0 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+    },
+    Z = dumpGrid {
+        { 1, 1, 1, 1, 1 },
+        { 0, 0, 0, 1, 0 },
+        { 0, 0, 1, 0, 0 },
+        { 0, 1, 0, 0, 0 },
+        { 1, 1, 1, 1, 1 },
+    },
+    T = dumpGrid {
+        { 1, 1, 1, 1, 1 },
+        { 0, 0, 1, 0, 0 },
+        { 0, 0, 1, 0, 0 },
+        { 0, 0, 1, 0, 0 },
+        { 0, 0, 1, 0, 0 },
+        { 0, 0, 1, 0, 0 },
+    },
+}
+local function selectDate(option)
+    if option == 'prev' then
+        local y, m, d = date:match('(%d%d)(%d%d)(%d%d)')
+        d = d - 1
+        if d == 0 then d, m = 31, m - 1 end
+        if m == 0 then m, y = 12, y - 1 end
+        if y == -1 then
+            y = 99
+            if not egg.AD_BC then
+                MSG.new('check', "We can travel to AD, to BC", 4.2)
+                egg.AD_BC = true
+            end
+        end
+        SCN.swapTo('main', 'swipeR', ('%02d%02d%02d'):format(y, m, d))
+    elseif option == 'next' then
+        local y, m, d = date:match('(%d%d)(%d%d)(%d%d)')
+        d = d + 1
+        if d == 32 then d, m = 1, m + 1 end
+        if m == 13 then m, y = 1, y + 1 end
+        if y == 100 then
+            y = 0
+            if not egg.AD_BC then
+                MSG.new('check', "We can travel to AD, to BC", 4.2)
+                egg.AD_BC = true
+            end
+        end
+        if ('%02d%02d%02d'):format(y, m, d) <= os.date('!%y%m%d') then
+            SCN.swapTo('main', 'swipeL', ('%02d%02d%02d'):format(y, m, d))
+        else
+            if not egg.back_to_future then
+                MSG.new('check', "Back To The Future", 4.2)
+                egg.back_to_future = true
+            end
+        end
+    elseif option == 'now' then
+        SCN.swapTo('main', 'swipeD', os.date('!%y%m%d'))
+    elseif option == 'random' then
+        math.randomseed(os.time())
+        local y, m, d = date:match('(%d%d)(%d%d)(%d%d)')
+        y, m, d = rnd(0, y), rnd(m), rnd(d)
+        SCN.swapTo('main', 'flash', ('%02d%02d%02d'):format(y, m, d))
+    end
+end
 
 local function showText(text)
     for textDX = -4, 4, 8 do
         for textDY = -4, 4, 8 do
-            TEXT:add { text = text, x = 250 + textDX, y = 580 + textDY, color = 'D', fontSize = 200, duration = 2.6, style = 'score', inPoint = .026, outPoint = .042 }
+            TEXT:add {
+                text = text,
+                x = 250 + textDX,
+                y = 580 + textDY,
+                k = 4,
+                fontSize = 65,
+                color = 'D',
+                duration = 2.6,
+                style = 'score',
+                inPoint = .026,
+                outPoint = .042,
+            }
         end
     end
-    TEXT:add { text = text, x = 250, y = 580, color = 'L', fontSize = 200, duration = 2.6, style = 'score', inPoint = .026, outPoint = .042 }
+    TEXT:add {
+        text = text,
+        x = 250,
+        y = 580,
+        k = 4,
+        fontSize = 65,
+        color = 'L',
+        duration = 2.6,
+        style = 'score',
+        inPoint = .026,
+        outPoint = .042,
+    }
 end
 local function triggerHint()
     TEXT:clear()
-    TWEEN.new():setUnique('hint_noLine'):setDuration(0):run()
 
     -- Check Rules
     local fault
@@ -279,34 +408,36 @@ local function triggerHint()
         elseif n == 13 then
             showText("?")
         end
-    end):setDuration(0.126):setLoop('repeat', 14):setUnique('hint_noLine'):run()
+        SFX.play(n < 13 and 'untick' or 'tick', .42)
+    end):setDuration(0.0626):setLoop('repeat', 14):setUnique('hint_noLine'):run()
 end
 
 ---@type Zenitha.Scene
 local scene = {}
 
-local rnd = math.random
 local function seed(n)
-    math.randomseed(os.date('!%Y') * 366 + os.date('!%j'))
+    math.randomseed(date + 0)
     for _ = 1, n do rnd() end
 end
 function scene.load()
-    -- Fresh date
-    date = os.date('!%y%m%d')
-    if date <= '240705' then
-        seed = function(n)
-            if n == 26 then
-                math.randomseed(os.date('!%Y') * 366 + os.date('!%j'))
+    if SCN.args[1] then
+        date = SCN.args[1]
+    end
+    -- Check new day
+    today = date == os.date('!%y%m%d')
+    if today then
+        if DATA.passDate ~= date then
+            DATA.passDate = false
+            DATA.maxTick = false
+            DATA.minTick = false
+            for i = 1, 5 do
+                DATA.tickMat[i] = TABLE.new(0, 5)
             end
         end
-    end
-    if DATA.passDate ~= date then
+    else
         DATA.passDate = false
         DATA.maxTick = false
         DATA.minTick = false
-        for i = 1, 5 do
-            DATA.tickMat[i] = TABLE.new(0, 5)
-        end
     end
 
     -- Rules
@@ -444,7 +575,6 @@ local dragging
 local dragStart
 function scene.mouseDown(x, y, k)
     if MATH.between(x, board.X, board.X + board.titleW) and MATH.between(y, board.Y, board.Y + board.infoH) then
-        if titleClick >= 26 then return end
         local origColor
         repeat
             origColor = ruleColor[activeRules[rnd(#activeRules)]]
@@ -455,9 +585,26 @@ function scene.mouseDown(x, y, k)
             titleColor[2] = MATH.lerp(origColor[2], 0, t)
             titleColor[3] = MATH.lerp(origColor[3], 0, t)
         end):setDuration(0.26):setUnique('titleColorTransition'):run()
-        titleClick = titleClick + 1
-        if titleClick == 26 then
-            MSG.new('info', Text.egg_clickTitle, 4.2)
+
+        local pattern = dumpGrid(DATA.tickMat)
+        if pattern == gridConst.left then
+            selectDate('prev')
+        elseif pattern == gridConst.right then
+            selectDate('next')
+        elseif pattern == gridConst.N then
+            selectDate('now')
+        elseif pattern == gridConst.R then
+            selectDate('random')
+        elseif pattern == gridConst.T then
+            MSG.new('check', "Techmino is fun!", 4.2)
+        elseif pattern == gridConst.Z then
+            MSG.new('check', "By MrZ", 4.2)
+        else
+            egg.bingo_clicker = egg.bingo_clicker + 1
+            if egg.bingo_clicker == 10 * egg.bingo_target then
+                egg.bingo_target = egg.bingo_target + 1
+                MSG.new('check', "[username]'s Bingo Card\n" .. egg.bingo_clicker .. " bingos\n ", 2.6)
+            end
         end
     elseif MATH.between(x, board.X + board.titleW, board.X + board.W) and MATH.between(y, board.Y, board.Y + board.infoH) then
         triggerHint()
@@ -548,7 +695,9 @@ function scene.update(dt)
     if saveTimer then
         saveTimer = saveTimer - dt
         if saveTimer <= 0 then
-            pcall(FILE.save, DATA, 'data.json', '-json')
+            if today then
+                pcall(FILE.save, DATA, 'data.json', '-json')
+            end
             saveTimer = nil
         end
     end
@@ -597,7 +746,7 @@ function scene.draw()
     gc.setColor(correct and COLOR.G or COLOR.D)
     gc.print(date, 10, board.infoH - 30)
     if DATA.passDate then
-        gc.setColor(COLOR.G)
+        gc.setColor(today and COLOR.G or COLOR.O)
         gc.print(Text.pass:format(DATA.minTick, DATA.maxTick), 80, board.infoH - 30)
     end
     if DATA.win > 0 then
@@ -649,7 +798,8 @@ function scene.draw()
     gc.translate(0, 5 * board.CH) -- Credit
     gc.setColor(0, 0, 0, .26)
     gc.print(Text.credits, 0, 12)
-    gc.printf(Text.version, 0, board.W, 12, 'right')
+    gc.setColor(0, 0, 0, .62)
+    gc.printf(Text.version, 0, 12, board.W, 'right')
 end
 
 scene.widgetList = {

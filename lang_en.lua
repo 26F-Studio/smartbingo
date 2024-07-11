@@ -16,13 +16,11 @@ return {
     },
     target = "Tick five in line to prove you are not ⑨",
     winDaily = "Daily puzzle solved!\nYou are not ⑨!",
+    winAny = "Puzzle solved!",
     winMax = "New maximal ticks!",
     winMin = "New minimal ticks!",
     credits = "Made By 26F Studio    Idea from QQ group image",
-    version = "1.0",
+    version = "V1.5",
     sound = "Sound",
     language = "文/A",
-    quit = "Quit",
-
-    egg_clickTitle = "What are you doing?",
 }
