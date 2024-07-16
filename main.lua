@@ -377,7 +377,7 @@ local function selectDate(option)
     elseif option == 'now' then
         SCN.swapTo('main', 'swipeD', os.date('!%y%m%d'))
     elseif option == 'random' then
-        math.randomseed(os.time())
+        math.randomseed(math.floor(os.time()+love.timer.getTime()*100))
         local y
         repeat
             y = rnd(0, 99)
