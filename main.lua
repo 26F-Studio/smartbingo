@@ -273,12 +273,42 @@ local gridConst = {
         { 1, 0, 0, 1, 1 },
         { 1, 0, 0, 0, 1 },
     },
-    R = dumpGrid {
-        { 1, 1, 1, 1, 0 },
-        { 1, 0, 0, 0, 1 },
-        { 1, 1, 1, 1, 0 },
-        { 1, 0, 0, 0, 1 },
-        { 1, 0, 0, 0, 1 },
+    R = {
+        dumpGrid {
+            { 1, 1, 1, 1, 0 },
+            { 1, 0, 0, 0, 1 },
+            { 1, 1, 1, 1, 0 },
+            { 1, 0, 0, 0, 1 },
+            { 1, 0, 0, 0, 1 },
+        },
+        dumpGrid {
+            { 1, 1, 1, 1, 0 },
+            { 1, 0, 0, 0, 1 },
+            { 1, 1, 1, 1, 0 },
+            { 1, 0, 0, 1, 0 },
+            { 1, 0, 0, 0, 1 },
+        },
+        dumpGrid {
+            { 1, 1, 1, 1, 1 },
+            { 1, 0, 0, 0, 1 },
+            { 1, 1, 1, 1, 1 },
+            { 1, 0, 0, 1, 0 },
+            { 1, 0, 0, 0, 1 },
+        },
+        dumpGrid {
+            { 1, 1, 1, 0, 0 },
+            { 1, 0, 0, 1, 0 },
+            { 1, 1, 1, 0, 0 },
+            { 1, 0, 0, 1, 0 },
+            { 1, 0, 0, 1, 0 },
+        },
+        dumpGrid {
+            { 0, 1, 1, 1, 0 },
+            { 0, 1, 0, 0, 1 },
+            { 0, 1, 1, 1, 0 },
+            { 0, 1, 0, 0, 1 },
+            { 0, 1, 0, 0, 1 },
+        },
     },
     Z = dumpGrid {
         { 1, 1, 1, 1, 1 },
@@ -596,7 +626,7 @@ function scene.mouseDown(x, y, k)
             selectDate('next')
         elseif pattern == gridConst.N then
             selectDate('now')
-        elseif pattern == gridConst.R then
+        elseif TABLE.find(gridConst.R, pattern) then
             selectDate('random')
         elseif pattern == gridConst.T then
             MSG.new('check', "Techmino is fun!", 4.2)
