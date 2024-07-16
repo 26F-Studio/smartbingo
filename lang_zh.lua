@@ -19,6 +19,8 @@ return {
     winAny = "谜题解决！",
     winMax = "新的最多勾数纪录！",
     winMin = "新的最少勾数纪录！",
+    easyMode = "普通模式",
+    hardMode = "困难模式",
     credits = "26F Studio 制作    创意来自QQ群图片",
     sound = "声音",
     language = "文/A",

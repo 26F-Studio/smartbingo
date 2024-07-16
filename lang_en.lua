@@ -19,6 +19,8 @@ return {
     winAny = "Puzzle solved!",
     winMax = "New maximal ticks!",
     winMin = "New minimal ticks!",
+    easyMode = "NORMAL MODE",
+    hardMode = "HARD MODE",
     credits = "Made By 26F Studio    Idea from QQ group image",
     sound = "Sound",
     language = "文/A",

@@ -341,6 +341,14 @@ local gridConst = {
         { 0, 0, 1, 0, 0 },
         { 0, 0, 1, 0, 0 },
     },
+    full = dumpGrid {
+        { 1, 1, 1, 1, 1 },
+        { 1, 1, 1, 1, 1 },
+        { 1, 1, 1, 1, 1 },
+        { 1, 1, 1, 1, 1 },
+        { 1, 1, 1, 1, 1 },
+        { 1, 1, 1, 1, 1 },
+    },
 }
 local function selectDate(option)
     if option == 'prev' then
@@ -473,7 +481,7 @@ function scene.load()
         date = SCN.args[1]
     end
     -- Check new day
-    today = date == os.date('!%y%m%d')
+    today = not hardMode and date == os.date('!%y%m%d')
     if today then
         if DATA.passDate ~= date then
             DATA.passDate = false
@@ -491,10 +499,16 @@ function scene.load()
 
     -- Rules
     seed(26)
-    activeRules = { 1, 2, 3, 4 }
-    local extraRules = { 5, 6, 7, 8 }
-    for _ = 1, MATH.randFreq { 60, 30, 10 } do
-        ins(activeRules, rem(extraRules, rnd(1, #extraRules)))
+    if hardMode then
+        activeRules = { 1, 4, 5, 6, 7 }
+        ins(activeRules, MATH.coin(2, 8))
+        table.sort(activeRules)
+    else
+        activeRules = { 1, 2, 3, 4 }
+        local extraRules = { 5, 6, 7, 8 }
+        for _ = 1, MATH.randFreq { 60, 30, 10 } do
+            ins(activeRules, rem(extraRules, rnd(1, #extraRules)))
+        end
     end
 
     -- Tick matrix
@@ -567,7 +581,7 @@ function scene.load()
     --         ruleMat[y][x] = pbMat[y][x]
     --     end
     -- end
-    for i = 1, rnd(8, 15) do
+    for i = 1, hardMode and rnd(20, 26) or rnd(8, 15) do
         local rule = existRule[i % #existRule + 1]
         local pbBlankCells = {}
         local pbCells = {}
@@ -593,6 +607,9 @@ function scene.load()
     end
 
     checkAnswer()
+    if DATA.sound and not hardMode then
+        BGM.set('naive', 'pitch', 1, 0)
+    end
 end
 
 function scene.keyDown(k, rep)
@@ -658,6 +675,17 @@ function scene.mouseDown(x, y, k)
             MSG.new('check', "Techmino is fun!", 4.2)
         elseif pattern == gridConst.Z then
             MSG.new('check', "By MrZ", 4.2)
+        elseif pattern == gridConst.full then
+            hardMode = not hardMode
+            if hardMode then
+                if DATA.sound then
+                    BGM.set('naive', 'pitch', 0.626, 2.6)
+                end
+                MSG.new('warn', Text.hardMode, 2.6)
+            else
+                MSG.new('info', Text.easyMode, 2.6)
+            end
+            SCN.swapTo('main', 'slowFade', date)
         else
             egg.bingo_clicker = egg.bingo_clicker + 1
             if egg.bingo_clicker == 10 * egg.bingo_target then
@@ -786,7 +814,7 @@ function scene.draw()
     gc.translate(board.X, board.Y)
 
     -- Board & Separator
-    gc.setColor(COLOR.D)
+    gc.setColor(hardMode and COLOR.dR or COLOR.D)
     gc.setLineWidth(4)
     gc.rectangle('line', 0, 0, board.W, board.H)
     gc.line(board.titleW, 0, board.titleW, board.infoH)
@@ -805,7 +833,7 @@ function scene.draw()
     gc.setColor(correct and COLOR.G or COLOR.D)
     gc.print(date, 10, board.infoH - 30)
     if DATA.passDate then
-        gc.setColor(today and COLOR.G or COLOR.O)
+        gc.setColor(hardMode and COLOR.R or today and COLOR.G or COLOR.O)
         gc.print(Text.pass:format(DATA.minTick, DATA.maxTick), 80, board.infoH - 30)
     end
     if DATA.win > 0 then
@@ -886,6 +914,9 @@ scene.widgetList = {
             DATA.sound = not DATA.sound
             if DATA.sound then
                 BGM.play('naive')
+                if hardMode then
+                    BGM.set('naive', 'pitch', 0.626, 0)
+                end
             else
                 BGM.stop()
             end
