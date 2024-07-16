@@ -310,6 +310,20 @@ local gridConst = {
             { 0, 1, 0, 0, 1 },
         },
     },
+    up = dumpGrid {
+        { 0, 0, 1, 0, 0 },
+        { 0, 1, 1, 1, 0 },
+        { 1, 0, 1, 0, 1 },
+        { 0, 0, 1, 0, 0 },
+        { 0, 0, 1, 0, 0 },
+    },
+    down = dumpGrid {
+        { 0, 0, 1, 0, 0 },
+        { 0, 0, 1, 0, 0 },
+        { 1, 0, 1, 0, 1 },
+        { 0, 1, 1, 1, 0 },
+        { 0, 0, 1, 0, 0 },
+    },
     Z = dumpGrid {
         { 1, 1, 1, 1, 1 },
         { 0, 0, 0, 1, 0 },
@@ -628,6 +642,16 @@ function scene.mouseDown(x, y, k)
             selectDate('now')
         elseif TABLE.find(gridConst.R, pattern) then
             selectDate('random')
+        elseif pattern == gridConst.up then
+            local y0=board.Y
+            TWEEN.new(function(t)
+                board.Y=y0-12*t
+            end):setDuration(0.26):run()
+        elseif pattern == gridConst.down then
+            local y0=board.Y
+            TWEEN.new(function(t)
+                board.Y=y0+12*t
+            end):setDuration(0.26):run()
         elseif pattern == gridConst.T then
             MSG.new('check', "Techmino is fun!", 4.2)
         elseif pattern == gridConst.Z then
