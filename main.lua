@@ -102,6 +102,8 @@ local activeRules = {}
 local ruleMat = {}
 local activeRuleTexts = {}
 local targetText = gc.newText(FONT.get(15))
+local versionText = gc.newText(FONT.get(20))
+versionText:set(require 'version'.string)
 
 local egg = {
     AD_BC = false,
@@ -377,7 +379,7 @@ local function selectDate(option)
     elseif option == 'now' then
         SCN.swapTo('main', 'swipeD', os.date('!%y%m%d'))
     elseif option == 'random' then
-        math.randomseed(math.floor(os.time()+love.timer.getTime()*100))
+        math.randomseed(math.floor(os.time() + love.timer.getTime() * 100))
         local y
         repeat
             y = rnd(0, 99)
@@ -643,14 +645,14 @@ function scene.mouseDown(x, y, k)
         elseif TABLE.find(gridConst.R, pattern) then
             selectDate('random')
         elseif pattern == gridConst.up then
-            local y0=board.Y
+            local y0 = board.Y
             TWEEN.new(function(t)
-                board.Y=y0-12*t
+                board.Y = y0 - 12 * t
             end):setDuration(0.26):run()
         elseif pattern == gridConst.down then
-            local y0=board.Y
+            local y0 = board.Y
             TWEEN.new(function(t)
-                board.Y=y0+12*t
+                board.Y = y0 + 12 * t
             end):setDuration(0.26):run()
         elseif pattern == gridConst.T then
             MSG.new('check', "Techmino is fun!", 4.2)
@@ -856,7 +858,7 @@ function scene.draw()
     gc.setColor(0, 0, 0, .26)
     gc.print(Text.credits, 0, 12)
     gc.setColor(0, 0, 0, .62)
-    gc.printf(Text.version, 0, 12, board.W, 'right')
+    gc.draw(versionText, board.W, 8, nil, nil, nil, versionText:getWidth(), 0)
 end
 
 scene.widgetList = {

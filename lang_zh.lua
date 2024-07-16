@@ -20,7 +20,6 @@ return {
     winMax = "新的最多勾数纪录！",
     winMin = "新的最少勾数纪录！",
     credits = "26F Studio 制作    创意来自QQ群图片",
-    version = "V1.5",
     sound = "声音",
     language = "文/A",
 }

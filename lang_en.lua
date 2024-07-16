@@ -9,7 +9,7 @@ return {
         "Blue: ≤2 ticks around",
         "Black: must be ticked",
         "Green: same tick count on ROW and COLUMN",
-        "Yellow: same tick count on each DIAGONAL line",
+        "Yellow: same tick count on DIAGONAL",
         "Orange: EVEN num of ticks around",
         "Purple: ODD num of ticks around",
         "Pink: tick on this color must be ISOLATE"
@@ -20,7 +20,6 @@ return {
     winMax = "New maximal ticks!",
     winMin = "New minimal ticks!",
     credits = "Made By 26F Studio    Idea from QQ group image",
-    version = "V1.5",
     sound = "Sound",
     language = "文/A",
 }
