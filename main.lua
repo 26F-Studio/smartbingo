@@ -334,8 +334,11 @@ local function selectDate(option)
         SCN.swapTo('main', 'swipeD', os.date('!%y%m%d'))
     elseif option == 'random' then
         math.randomseed(os.time())
-        local y, m, d = date:match('(%d%d)(%d%d)(%d%d)')
-        y, m, d = rnd(0, y), rnd(m), rnd(d)
+        local y
+        repeat
+            y = rnd(0, 99)
+        until not MATH.between(y, 24, 35.5)
+        local m, d = rnd(12), rnd(31)
         SCN.swapTo('main', 'flash', ('%02d%02d%02d'):format(y, m, d))
     end
 end
