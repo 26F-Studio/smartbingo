@@ -688,12 +688,12 @@ function scene.mouseDown(x, y, k)
             local y0 = board.Y
             TWEEN.new(function(t)
                 board.Y = y0 - 12 * t
-            end):setDuration(0.26):setUnique('egg_moveUp'):run()
+            end):setEase('Linear'):setDuration(0.26):setUnique('egg_moveUp'):run()
         elseif pattern == gridConst.down then
             local y0 = board.Y
             TWEEN.new(function(t)
                 board.Y = y0 + 12 * t
-            end):setDuration(0.26):setUnique('egg_moveDown'):run()
+            end):setEase('Linear'):setDuration(0.26):setUnique('egg_moveDown'):run()
         elseif pattern == gridConst.T then
             MSG.new('check', "Techmino is fun!", 4.2)
         elseif pattern == gridConst.Z then
