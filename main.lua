@@ -49,9 +49,8 @@ SFX.load('solve', 'solve.ogg')
 FONT.load('unifont', 'unifont.otf')
 FONT.setDefaultFont('unifont')
 
-local bgColor = { COLOR.HEX 'EDEDED' }
-BG.add('light', { draw = function() GC.clear(bgColor) end })
-BG.set('light')
+BG.set('color')
+BG.send('color', COLOR.HEX 'EDEDED')
 
 
 
@@ -72,6 +71,7 @@ local ruleColor = {
     COLOR.lR,
 }
 local cellColor = {
+    [false] = { COLOR.HEX 'EDEDED' },
     { 1,  0, .26 },
     COLOR.B,
     COLOR.D,
@@ -81,6 +81,24 @@ local cellColor = {
     { .8, 0,   1 },
     { 1,  .62, .82 },
 }
+local cellColorHard = {
+    [false] = { COLOR.HEX 'EDEDED' },
+    { 1,  0, .26 },
+    COLOR.B,
+    COLOR.D,
+    COLOR.G,
+    { .9, 1, 0 },
+    COLOR.O,
+    { .8, 0,   1 },
+    { 1,  .62, .82 },
+}
+for k, v in next, cellColorHard do
+    v = TABLE.copy(v)
+    v[1] = v[1] * .7023
+    v[2] = v[2] * .7023
+    v[3] = v[3] * .7023
+    cellColorHard[k] = v
+end
 local board = {
     X = 20,
     Y = 50,
@@ -393,7 +411,7 @@ local function selectDate(option)
             y = rnd(0, 99)
         until not MATH.between(y, 24, 35.5)
         local m, d = rnd(12), rnd(31)
-        SCN.swapTo('main', 'flash', ('%02d%02d%02d'):format(y, m, d))
+        SCN.swapTo('main', 'fade', ('%02d%02d%02d'):format(y, m, d))
     end
 end
 
@@ -438,7 +456,7 @@ local function triggerHint()
                 fault = true
                 SYSFX.rect(.4, board.X + (cx - 1) * board.CW + 6, board.Y + board.infoH + (cy - 1) * board.CH + 6,
                     board.CW - 12,
-                    board.CH - 12, 0, 1, 1, 1.626)
+                    board.CH - 12, 0, hardMode and .942 or 1, hardMode and .942 or 1, 1.626)
             end
         end
     end
@@ -610,6 +628,11 @@ function scene.load()
     if DATA.sound and not hardMode then
         BGM.set('naive', 'pitch', 1, 0)
     end
+    if hardMode then
+        BG.send('color', COLOR.HEX '444040')
+    else
+        BG.send('color', COLOR.HEX 'EDEDED')
+    end
 end
 
 function scene.keyDown(k, rep)
@@ -665,12 +688,12 @@ function scene.mouseDown(x, y, k)
             local y0 = board.Y
             TWEEN.new(function(t)
                 board.Y = y0 - 12 * t
-            end):setDuration(0.26):run()
+            end):setDuration(0.26):setUnique('egg_moveUp'):run()
         elseif pattern == gridConst.down then
             local y0 = board.Y
             TWEEN.new(function(t)
                 board.Y = y0 + 12 * t
-            end):setDuration(0.26):run()
+            end):setDuration(0.26):setUnique('egg_moveDown'):run()
         elseif pattern == gridConst.T then
             MSG.new('check', "Techmino is fun!", 4.2)
         elseif pattern == gridConst.Z then
@@ -679,13 +702,13 @@ function scene.mouseDown(x, y, k)
             hardMode = not hardMode
             if hardMode then
                 if DATA.sound then
-                    BGM.set('naive', 'pitch', 0.626, 2.6)
+                    BGM.set('naive', 'pitch', 0.626, 0)
                 end
                 MSG.new('warn', Text.hardMode, 2.6)
             else
                 MSG.new('info', Text.easyMode, 2.6)
             end
-            SCN.swapTo('main', 'slowFade', date)
+            SCN.swapTo('main', 'flash', date)
         else
             egg.bingo_clicker = egg.bingo_clicker + 1
             if egg.bingo_clicker == 10 * egg.bingo_target then
@@ -814,7 +837,7 @@ function scene.draw()
     gc.translate(board.X, board.Y)
 
     -- Board & Separator
-    gc.setColor(hardMode and COLOR.dR or COLOR.D)
+    gc.setColor(hardMode and COLOR.R or COLOR.D)
     gc.setLineWidth(4)
     gc.rectangle('line', 0, 0, board.W, board.H)
     gc.line(board.titleW, 0, board.titleW, board.infoH)
@@ -860,6 +883,7 @@ function scene.draw()
     -- Bingo
     gc.translate(-board.titleW, board.infoH)
     gc.setLineWidth(2)
+    local colorSet = hardMode and cellColorHard or cellColor
     for y = 1, 5 do
         for x = 1, 5 do
             local x0, y0 = (x - 1) * board.CW, (y - 1) * board.CH
@@ -867,10 +891,8 @@ function scene.draw()
             -- if type(color) == 'table' then
             --     color = TABLE.find(color, debugColor) and debugColor
             -- end
-            if color then
-                gc.setColor(cellColor[color])
-                gc.rectangle('fill', x0, y0, board.CW, board.CH)
-            end
+            gc.setColor(colorSet[color])
+            gc.rectangle('fill', x0, y0, board.CW, board.CH)
             gc.setColor(COLOR.D)
             gc.rectangle('line', x0, y0, board.CW, board.CH)
 
