@@ -237,10 +237,14 @@ local function checkAnswer()
 
     -- Win
     local needSave
-    if dailyMode and DATA.passDate ~= date then
-        DATA.win = DATA.win + 1
+    if DATA.passDate ~= date then
+        if dailyMode then
+            DATA.win = DATA.win + 1
+            MSG.new('check', Text.winDaily, 2.6)
+        else
+            MSG.new('check', Text.winAny, 2.6)
+        end
         DATA.passDate = date
-        MSG.new('check', Text.winDaily, 2.6)
         needSave = true
         DATA.maxTick = count
         DATA.minTick = count
