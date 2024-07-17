@@ -81,23 +81,11 @@ local cellColor = {
     { .8, 0,   1 },
     { 1,  .62, .82 },
 }
-local cellColorHard = {
-    [false] = { COLOR.HEX 'EDEDED' },
-    { 1,  0, .26 },
-    COLOR.B,
-    COLOR.D,
-    COLOR.G,
-    { .9, 1, 0 },
-    COLOR.O,
-    { .8, 0,   1 },
-    { 1,  .62, .82 },
-}
-for k, v in next, cellColorHard do
-    v = TABLE.copy(v)
+local cellColorHard = TABLE.copyAll(cellColor)
+for _, v in next, cellColorHard do
     v[1] = v[1] * .7023
     v[2] = v[2] * .7023
     v[3] = v[3] * .7023
-    cellColorHard[k] = v
 end
 local board = {
     X = 20,
