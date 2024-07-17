@@ -14,7 +14,7 @@ return {
         "Purple: ODD num of ticks around",
         "Pink: tick on this color must be ISOLATE"
     },
-    target = "Tick five in line to prove you are not ⑨",
+    target = "Have five Ticks in a line to prove you are not ⑨",
     winDaily = "Daily puzzle solved!\nYou are not ⑨!",
     winAny = "Puzzle solved!",
     winMax = "New maximal ticks!",
