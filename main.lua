@@ -112,7 +112,7 @@ local board = {
 
 local titleColor = { 0, 0, 0 }
 -- local debugColor
-local today ---@type boolean only save on today
+local dailyMode ---@type boolean only save on today
 local date = os.date('!%y%m%d')
 local correct
 local saveTimer
@@ -237,7 +237,7 @@ local function checkAnswer()
 
     -- Win
     local needSave
-    if DATA.passDate ~= date then
+    if dailyMode and DATA.passDate ~= date then
         DATA.win = DATA.win + 1
         DATA.passDate = date
         MSG.new('check', Text.winDaily, 2.6)
@@ -499,8 +499,8 @@ function scene.load()
         date = SCN.args[1]
     end
     -- Check new day
-    today = not hardMode and date == os.date('!%y%m%d')
-    if today then
+    dailyMode = not hardMode and date == os.date('!%y%m%d')
+    if dailyMode then
         if DATA.passDate ~= date then
             DATA.passDate = false
             DATA.maxTick = false
@@ -805,7 +805,7 @@ function scene.update(dt)
     if saveTimer then
         saveTimer = saveTimer - dt
         if saveTimer <= 0 then
-            if today then
+            if dailyMode then
                 pcall(FILE.save, DATA, 'data.json', '-json')
             end
             saveTimer = nil
@@ -856,7 +856,7 @@ function scene.draw()
     gc.setColor(correct and COLOR.G or COLOR.D)
     gc.print(date, 10, board.infoH - 30)
     if DATA.passDate then
-        gc.setColor(hardMode and COLOR.R or today and COLOR.G or COLOR.O)
+        gc.setColor(hardMode and COLOR.R or dailyMode and COLOR.G or COLOR.O)
         gc.print(Text.pass:format(DATA.minTick, DATA.maxTick), 80, board.infoH - 30)
     end
     if DATA.win > 0 then
