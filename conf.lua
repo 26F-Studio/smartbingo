@@ -40,5 +40,7 @@ function love.conf(t)
         W.minwidth,W.minheight=288,180
     end
     W.title='Smart Bingo v1.0'
-    W.icon='icon.png'
+    if fs.getInfo('icon.png') then
+        W.icon='icon.png'
+    end
 end

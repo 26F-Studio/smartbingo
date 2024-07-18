@@ -74,11 +74,6 @@ jobs:
         with:
           name: ${{ env.CORE_LOVE_ARTIFACT_NAME }}
           path: ${{ env.CORE_LOVE_PACKAGE_PATH }}
-      - name: Add icon to love package
-        run: |
-          cp ./.github/build/linux/${{ env.BUILD_TYPE }}/icon.png ./icon.png
-          zip -u ${{ env.CORE_LOVE_PACKAGE_PATH }} ./icon.png
-          rm ./icon.png
       - name: Rename love package
         run: |
           mkdir -p ${{ env.OUTPUT_FOLDER }}
@@ -260,9 +255,9 @@ jobs:
           name: ${{ env.CORE_LOVE_ARTIFACT_NAME }}
       - name: Add icon to love package
         run: |
-          cp ./.github/build/linux/${{ env.BUILD_TYPE }}/icon.png assets/image/icon.png
-          zip -u ${{ env.CORE_LOVE_PACKAGE_PATH }} assets/image/icon.png
-          rm assets/image/icon.png
+          cp ./.github/build/linux/${{ env.BUILD_TYPE }}/icon.png ./icon.png
+          zip -u ${{ env.CORE_LOVE_PACKAGE_PATH }} ./icon.png
+          rm ./icon.png
       - name: Build Linux packages
         id: build-packages
         uses: 26F-Studio/love-actions-linux@v1
