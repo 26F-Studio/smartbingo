@@ -1,4 +1,5 @@
 function love.conf(t)
+    local fs=love.filesystem
     local mobile=love._os=='Android'
 
     t.identity='SmartBingo'
@@ -39,4 +40,5 @@ function love.conf(t)
         W.minwidth,W.minheight=288,180
     end
     W.title='Smart Bingo v1.0'
+    W.icon='icon.png'
 end

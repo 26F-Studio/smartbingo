@@ -21,7 +21,7 @@ jobs:
       commit-hash: ${{ steps.git-info.outputs.commit-hash }}
       base-name: ${{ steps.assemble-base-name.outputs.base-name }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install lua
         run: |
           sudo apt-get install lua5.3 -y
@@ -53,7 +53,7 @@ jobs:
       OUTPUT_FOLDER: ./build
       RELEASE_FOLDER: ./release
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Process app name
@@ -70,21 +70,21 @@ jobs:
           build-list: ./Zenitha/ ./*.lua ./*.ogg ./*.otf
           package-path: ${{ env.CORE_LOVE_PACKAGE_PATH }}
       - name: Upload core love package
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.CORE_LOVE_ARTIFACT_NAME }}
           path: ${{ env.CORE_LOVE_PACKAGE_PATH }}
       - name: Add icon to love package
         run: |
-          cp ./.github/build/linux/${{ env.BUILD_TYPE }}/icon.png assets/image/icon.png
-          zip -u ${{ env.CORE_LOVE_PACKAGE_PATH }} assets/image/icon.png
-          rm assets/image/icon.png
+          cp ./.github/build/linux/${{ env.BUILD_TYPE }}/icon.png ./icon.png
+          zip -u ${{ env.CORE_LOVE_PACKAGE_PATH }} ./icon.png
+          rm ./icon.png
       - name: Rename love package
         run: |
           mkdir -p ${{ env.OUTPUT_FOLDER }}
           mv ${{ env.CORE_LOVE_PACKAGE_PATH }} ${{ env.OUTPUT_FOLDER }}/${{ steps.process-app-name.outputs.product-name }}.love
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ needs.get-info.outputs.base-name }}_Core
           path: ${{ env.OUTPUT_FOLDER }}/${{ steps.process-app-name.outputs.product-name }}.love
@@ -110,7 +110,7 @@ jobs:
       OUTPUT_FOLDER: ./build
       RELEASE_FOLDER: ./release
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Process app name
@@ -122,7 +122,7 @@ jobs:
           with open(os.getenv('GITHUB_OUTPUT'), 'a') as f:
             f.write('product-name=' + re.sub(r'[^A-Za-z0-9]+', '_', '${{ needs.get-info.outputs.app-name }}') + '\n')
       - name: Download core love package
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ env.CORE_LOVE_ARTIFACT_NAME }}
       - name: Build Windows packages
@@ -138,17 +138,17 @@ jobs:
           installer-languages: ChineseSimplified.isl ChineseTraditional.isl English.isl Spanish.isl French.isl Indonesian.isl Japanese.isl Portuguese.isl
           output-folder: ${{ env.OUTPUT_FOLDER }}
       - name: Upload 32-bit artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ needs.get-info.outputs.base-name }}_Windows_x86
           path: ${{ env.OUTPUT_FOLDER }}/${{ steps.process-app-name.outputs.product-name }}_x86.zip
       - name: Upload 64-bit artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ needs.get-info.outputs.base-name }}_Windows_x64
           path: ${{ env.OUTPUT_FOLDER }}/${{ steps.process-app-name.outputs.product-name }}_x64.zip
       - name: Upload installer artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ needs.get-info.outputs.base-name }}_Windows_installer
           path: ${{ env.OUTPUT_FOLDER }}/${{ steps.process-app-name.outputs.product-name }}_installer.exe
@@ -180,7 +180,7 @@ jobs:
       OUTPUT_FOLDER: ./build
       RELEASE_FOLDER: ./release
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Process app name
@@ -193,7 +193,7 @@ jobs:
             f.write('bundle-id=org.f26_studio.' + re.sub(r'[^A-Za-z0-9]+', '_', '${{ needs.get-info.outputs.app-name }}') + '\n')
             f.write('product-name=' + re.sub(r'[^A-Za-z0-9]+', '-', '${{ needs.get-info.outputs.app-name }}') + '\n')
       - name: Download core love package
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ env.CORE_LOVE_ARTIFACT_NAME }}
       - name: Build Android packages
@@ -214,7 +214,7 @@ jobs:
           version-code: ${{ needs.get-info.outputs.version-code }}
           output-folder: ${{ env.OUTPUT_FOLDER }}
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ needs.get-info.outputs.base-name }}_Android_release
           path: ${{ env.OUTPUT_FOLDER }}/${{ steps.process-app-name.outputs.product-name }}-release.apk
@@ -240,7 +240,7 @@ jobs:
       OUTPUT_FOLDER: ./build
       RELEASE_FOLDER: ./release
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
       - name: Process app name
@@ -255,7 +255,7 @@ jobs:
             f.write('bundle-id=org.26f-studio.' + product_name + '\n')
             f.write('product-name=' + product_name + '\n')
       - name: Download core love package
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ env.CORE_LOVE_ARTIFACT_NAME }}
       - name: Add icon to love package
@@ -276,12 +276,12 @@ jobs:
           product-name: ${{ steps.process-app-name.outputs.product-name }}
           output-folder: ${{ env.OUTPUT_FOLDER }}
       - name: Upload AppImage artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ needs.get-info.outputs.base-name }}_Linux_AppImage
           path: ${{ env.OUTPUT_FOLDER }}/${{ steps.process-app-name.outputs.product-name }}.AppImage
       - name: Upload Debian artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ needs.get-info.outputs.base-name }}_Linux_Debian
           path: ${{ env.OUTPUT_FOLDER }}/${{ steps.process-app-name.outputs.product-name }}.deb
@@ -316,7 +316,7 @@ jobs:
     env:
       ACTION_TYPE: ${{ fromJSON('[["Development", "Pre-release"], ["Release", "Release"]]')[startsWith(github.ref, 'refs/tags/v')][startsWith(github.ref, 'refs/tags/pre')] }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Cleanup
         uses: geekyeggo/delete-artifact@v2
         with:
