@@ -815,15 +815,15 @@ local tick = GC.load { 62, 62,
     { 'line',  2,      28, 26, 48, 50, 3 },
 }
 local cross = GC.load { 62, 62,
-    { 'move',  4,      4 },
-    { 'setLW', 10 },
-    { 'setCL', 0,      0,  0 },
-    { 'line',  0,      0,  52, 52 },
-    { 'line',  0,      52, 52, 0 },
+    { 'move',  4,   4 },
+    { 'setLW', 8 },
+    { 'setCL', 0,   0,   0 },
+    { 'line',  0,   0,   52, 52 },
+    { 'line',  0,   52,  52, 0 },
     { 'setLW', 4 },
-    { 'setCL', COLOR.L },
-    { 'line',  2,      2,  50, 50 },
-    { 'line',  2,      50, 50, 2 },
+    { 'setCL', .62, .62, .62 },
+    { 'line',  2,   2,   50, 50 },
+    { 'line',  2,   50,  50, 2 },
 }
 function scene.draw()
     gc.translate(board.X, board.Y)
