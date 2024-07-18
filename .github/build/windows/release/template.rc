@@ -8,10 +8,10 @@ FILETYPE 0x1
     {
         BLOCK "040904B0"
         {
-            VALUE "FileDescription", "Techmino Galaxy"
+            VALUE "FileDescription", "Smart Bingo"
             VALUE "CompanyName", "26F Studio"
             VALUE "LegalCopyright", "Copyright @ 26F Studio"
-            VALUE "ProductName", "Techmino Galaxy"
+            VALUE "ProductName", "Smart Bingo"
             VALUE "ProductVersion", "@Version"
         }
     }
