@@ -109,7 +109,7 @@ local ruleMat = {}
 local activeRuleTexts = {}
 local targetText = gc.newText(FONT.get(15))
 local versionText = gc.newText(FONT.get(20))
-versionText:set(require 'version'.string)
+versionText:set(require 'version'.appVer)
 
 local egg = {
     AD_BC = false,
