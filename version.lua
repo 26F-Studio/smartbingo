@@ -1,5 +1,6 @@
 return{
-    ["apkCode"]=8,
-    ["code"]=108,
-    ["string"]="V1.8",
+    ["appName"]="Smart Bingo",
+    ["appVer"]="V1.8",
+    ["apkCode"]=108,
+    ["verStr"]="1.8.0",
 }
