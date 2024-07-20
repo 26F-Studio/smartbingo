@@ -518,21 +518,22 @@ function scene.load()
     end
 
     -- Rules
+    local tempRuleList
     seed(26)
     if hardMode then
-        activeRules = { 1, 4, 5, 6, 7 }
-        ins(activeRules, ({ 2, 8, 9 })[rnd(3)])
+        tempRuleList = { 1, 4, 5, 6, 7 }
+        ins(tempRuleList, ({ 2, 8, 9 })[rnd(3)])
     else
-        activeRules = { 1, 2, 3, 4 }
+        tempRuleList = { 1, 2, 3, 4 }
         local extraRules = { 5, 6, 7, 8, 9 }
         for _ = 1, MATH.randFreq { 60, 30, 10 } do
-            ins(activeRules, rem(extraRules, rnd(1, #extraRules)))
+            ins(tempRuleList, rem(extraRules, rnd(1, #extraRules)))
         end
-        if #activeRules >= 7 then
-            rem(activeRules, ({ 1, 2, 4 })[rnd(3)])
+        if #tempRuleList >= 7 then
+            rem(tempRuleList, ({ 1, 2, 4 })[rnd(3)])
         end
     end
-    table.sort(activeRules)
+    table.sort(tempRuleList)
 
     -- Tick matrix
     seed(35.5)
@@ -570,8 +571,8 @@ function scene.load()
     for y = 1, 5 do
         for x = 1, 5 do
             pbMat[y][x] = {}
-            for r = 1, #activeRules do
-                local rule = activeRules[r]
+            for r = 1, #tempRuleList do
+                local rule = tempRuleList[r]
                 if checkCell(rule, tickMat, x, y) then
                     ins(pbMat[y][x], rule)
                     ruleCount[rule] = ruleCount[rule] + 1
@@ -580,14 +581,9 @@ function scene.load()
             -- printf("(%d,%d):%s", x, y, table.concat(pbMat[y][x], ' '))
         end
     end
+    -- for k, v in next, ruleCount do print(k, v) end
 
-    -- Remove useless rule
-    for i = 1, #ruleCount do
-        if ruleCount[i] == 0 then
-            TABLE.delete(activeRules, i)
-        end
-    end
-    freshRuleText()
+    -- Filter impossible rule
     local existRule = {}
     for i = 1, #ruleCount do
         if ruleCount[i] > 0 then
@@ -629,6 +625,23 @@ function scene.load()
         end
     end
 
+    local usedRuleCount = TABLE.new(0, 9)
+    for y = 1, 5 do
+        for x = 1, 5 do
+            local r = ruleMat[y][x]
+            if r then
+                usedRuleCount[r] = usedRuleCount[r] + 1
+            end
+        end
+    end
+    activeRules = {}
+    for i = 1, #usedRuleCount do
+        if usedRuleCount > 0 then
+            ins(activeRules, i)
+        end
+    end
+    freshRuleText()
+
     checkAnswer()
     if DATA.sound and not hardMode then
         BGM.set('naive', 'pitch', 1, 0)
@@ -638,6 +651,8 @@ function scene.load()
     else
         BG.send('color', COLOR.HEX 'EDEDED')
     end
+
+    collectgarbage()
 end
 
 function scene.keyDown(k, rep)
