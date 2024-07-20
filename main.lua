@@ -332,6 +332,20 @@ local gridConst = {
             { 0, 1, 0, 0, 1 },
         },
     },
+    H = dumpGrid {
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 1, 1, 1, 1 },
+        { 1, 0, 0, 0, 1 },
+        { 1, 0, 0, 0, 1 },
+    },
+    full = dumpGrid {
+        { 1, 1, 1, 1, 1 },
+        { 1, 1, 1, 1, 1 },
+        { 1, 1, 1, 1, 1 },
+        { 1, 1, 1, 1, 1 },
+        { 1, 1, 1, 1, 1 },
+    },
     up = dumpGrid {
         { 0, 0, 1, 0, 0 },
         { 0, 1, 1, 1, 0 },
@@ -360,14 +374,6 @@ local gridConst = {
         { 0, 0, 1, 0, 0 },
         { 0, 0, 1, 0, 0 },
         { 0, 0, 1, 0, 0 },
-    },
-    full = dumpGrid {
-        { 1, 1, 1, 1, 1 },
-        { 1, 1, 1, 1, 1 },
-        { 1, 1, 1, 1, 1 },
-        { 1, 1, 1, 1, 1 },
-        { 1, 1, 1, 1, 1 },
-        { 1, 1, 1, 1, 1 },
     },
 }
 local function selectDate(option)
@@ -718,7 +724,7 @@ function scene.mouseDown(x, y, k)
             MSG.new('check', "Techmino is fun!", 4.2)
         elseif pattern == gridConst.Z then
             MSG.new('check', "By MrZ", 4.2)
-        elseif pattern == gridConst.full then
+        elseif pattern == gridConst.H or pattern == gridConst.full then
             hardMode = not hardMode
             if hardMode then
                 if DATA.sound then
