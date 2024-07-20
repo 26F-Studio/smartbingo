@@ -522,14 +522,17 @@ function scene.load()
     if hardMode then
         activeRules = { 1, 4, 5, 6, 7 }
         ins(activeRules, ({ 2, 8, 9 })[rnd(3)])
-        table.sort(activeRules)
     else
         activeRules = { 1, 2, 3, 4 }
         local extraRules = { 5, 6, 7, 8, 9 }
         for _ = 1, MATH.randFreq { 60, 30, 10 } do
             ins(activeRules, rem(extraRules, rnd(1, #extraRules)))
         end
+        if #activeRules >= 7 then
+            rem(activeRules, ({ 1, 2, 4 })[rnd(3)])
+        end
     end
+    table.sort(activeRules)
 
     -- Tick matrix
     seed(35.5)
