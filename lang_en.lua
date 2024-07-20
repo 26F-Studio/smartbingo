@@ -12,7 +12,8 @@ return {
         "Yellow: same tick count on DIAGONAL",
         "Orange: EVEN num of ticks around",
         "Purple: ODD num of ticks around",
-        "Pink: tick on this color must be ISOLATE"
+        "Pink: tick on this color must be ISOLATE",
+        "Cyan: tick on this color must NON-ISOLATE",
     },
     target = "Have five Ticks in a line to prove you are not ⑨",
     winDaily = "Daily puzzle solved!\nYou are not ⑨!",

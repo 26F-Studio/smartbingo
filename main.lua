@@ -69,6 +69,7 @@ local ruleColor = {
     COLOR.O,
     COLOR.V,
     COLOR.lR,
+    COLOR.C,
 }
 local cellColor = {
     [false] = { COLOR.HEX 'EDEDED' },
@@ -80,6 +81,7 @@ local cellColor = {
     COLOR.O,
     { .8, 0,   1 },
     { 1,  .62, .82 },
+    { 0,  .8,  .8 },
 }
 local cellColorHard = TABLE.copyAll(cellColor)
 for _, v in next, cellColorHard do
@@ -196,6 +198,14 @@ local function checkCell(rule, tickMat, x, y)
                 safeGet(tickMat, x + 1, y) ~= 1 and
                 safeGet(tickMat, x, y - 1) ~= 1 and
                 safeGet(tickMat, x, y + 1) ~= 1
+            )
+    elseif rule == 9 then
+        return
+            tickMat[y][x] ~= 1 or (
+                safeGet(tickMat, x - 1, y) == 1 or
+                safeGet(tickMat, x + 1, y) == 1 or
+                safeGet(tickMat, x, y - 1) == 1 or
+                safeGet(tickMat, x, y + 1) == 1
             )
     end
 end
@@ -511,11 +521,11 @@ function scene.load()
     seed(26)
     if hardMode then
         activeRules = { 1, 4, 5, 6, 7 }
-        ins(activeRules, MATH.coin(2, 8))
+        ins(activeRules, ({ 2, 8, 9 })[rnd(3)])
         table.sort(activeRules)
     else
         activeRules = { 1, 2, 3, 4 }
-        local extraRules = { 5, 6, 7, 8 }
+        local extraRules = { 5, 6, 7, 8, 9 }
         for _ = 1, MATH.randFreq { 60, 30, 10 } do
             ins(activeRules, rem(extraRules, rnd(1, #extraRules)))
         end
@@ -551,7 +561,7 @@ function scene.load()
     -- end
     -- DATA.tickMat = tickMat
 
-    local ruleCount = TABLE.new(0, 8)
+    local ruleCount = TABLE.new(0, 9)
     local pbMat = {}
     for i = 1, 5 do pbMat[i] = TABLE.new({}, 5) end
     for y = 1, 5 do
