@@ -642,7 +642,7 @@ function scene.load()
     end
     activeRules = {}
     for i = 1, #usedRuleCount do
-        if #usedRuleCount > 0 then
+        if usedRuleCount[i] > 0 then
             ins(activeRules, i)
         end
     end
