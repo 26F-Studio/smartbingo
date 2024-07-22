@@ -198,7 +198,7 @@ jobs:
           import os
           import re
           with open(os.getenv('GITHUB_OUTPUT'), 'a') as f:
-            f.write('bundle-id=org.f26_studio.' + re.sub(r'[^A-Za-z0-9]+', '_', '${{ needs.get-info.outputs.app-name }}') + '\n')
+            f.write('bundle-id=org.Studio26F.SmartBingo\n')
             f.write('product-name=' + re.sub(r'[^A-Za-z0-9]+', '-', '${{ needs.get-info.outputs.app-name }}') + '\n')
       - name: Download core love package
         uses: actions/download-artifact@v4
