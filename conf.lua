@@ -4,7 +4,7 @@ function love.conf(t)
 
     t.identity='SmartBingo'
     t.externalstorage=true
-    t.version="11.5"
+    t.version="11.4"
     t.gammacorrect=false
     t.appendidentity=true
     t.accelerometerjoystick=false
