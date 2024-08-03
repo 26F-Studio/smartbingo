@@ -33,6 +33,7 @@ local DATA = {
 for i = 1, 5 do DATA.tickMat[i] = TABLE.new(0, 5) end
 local suc, res = pcall(FILE.load, 'data.json', '-json')
 if suc then TABLE.update(DATA, res) end
+SFX.setVol(DATA.sound and 1 or 0)
 
 BGM.load('naive', 'naive.ogg')
 TASK.new(function()
@@ -778,9 +779,7 @@ function scene.mouseMove(x, y)
             end
             dragging[cx .. cy] = true
             DATA.tickMat[cy][cx] = 1 - DATA.tickMat[cy][cx]
-            if DATA.sound then
-                SFX.play(DATA.tickMat[cy][cx] == 1 and 'tick' or 'untick')
-            end
+            SFX.play(DATA.tickMat[cy][cx] == 1 and 'tick' or 'untick')
         end
     end
 end
@@ -960,6 +959,7 @@ scene.widgetList = {
         disp = TABLE.func_getVal(DATA, 'sound'),
         code = function()
             DATA.sound = not DATA.sound
+            SFX.setVol(DATA.sound and 1 or 0)
             if DATA.sound then
                 BGM.play('naive')
                 if hardMode then
