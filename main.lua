@@ -35,7 +35,7 @@ local suc, res = pcall(FILE.load, 'data.json', '-json')
 if suc then TABLE.update(DATA, res) end
 SFX.setVol(DATA.sound and 1 or 0)
 
-BGM.load('naive', 'naive.ogg')
+BGM.load('naive', 'audio/naive.ogg')
 TASK.new(function()
     TASK.yieldT(.626)
     if DATA.sound then
@@ -44,12 +44,12 @@ TASK.new(function()
 end)
 
 SFX.load({
-    tick = 'tick.ogg',
-    untick = 'untick.ogg',
-    solve = 'solve.ogg',
-    copy = 'copy.ogg',
-    paste = 'paste.ogg',
-    error = 'error.ogg',
+    tick = 'audio/tick.ogg',
+    untick = 'audio/untick.ogg',
+    solve = 'audio/solve.ogg',
+    copy = 'audio/copy.ogg',
+    paste = 'audio/paste.ogg',
+    error = 'audio/error.ogg',
 })
 
 FONT.load('unifont', 'unifont.otf')
