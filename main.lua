@@ -37,15 +37,18 @@ SFX.setVol(DATA.sound and 1 or 0)
 
 BGM.load('naive', 'naive.ogg')
 TASK.new(function()
-    DEBUG.yieldT(.626)
+    TASK.yieldT(.626)
     if DATA.sound then
         BGM.play('naive')
     end
 end)
 
-SFX.load('tick', 'tick.ogg')
-SFX.load('untick', 'untick.ogg')
-SFX.load('solve', 'solve.ogg')
+SFX.load({
+    untick='untick.ogg',
+    solve='solve.ogg',
+    copy='copy.ogg',
+    paste='paste.ogg',
+})
 
 FONT.load('unifont', 'unifont.otf')
 FONT.setDefaultFont('unifont')
@@ -838,7 +841,7 @@ function scene.update(dt)
     end
 end
 
-local tick = GC.load { 62, 62,
+local tick = GC.load { w=62, h=62,
     { 'move',  4,      4 },
     { 'setLW', 10 },
     { 'setCL', 0,      0,  0 },
@@ -847,7 +850,7 @@ local tick = GC.load { 62, 62,
     { 'setCL', COLOR.L },
     { 'line',  2,      28, 26, 48, 50, 3 },
 }
-local cross = GC.load { 62, 62,
+local cross = GC.load { w=62, h=62,
     { 'move',  4,   4 },
     { 'setLW', 8 },
     { 'setCL', 0,   0,   0 },
