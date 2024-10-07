@@ -37,7 +37,7 @@ SFX.setVol(DATA.sound and 1 or 0)
 
 BGM.load('naive', 'naive.ogg')
 TASK.new(function()
-    DEBUG.yieldT(0.626)
+    DEBUG.yieldT(.626)
     if DATA.sound then
         BGM.play('naive')
     end
@@ -57,7 +57,7 @@ BG.send('color', COLOR.HEX 'EDEDED')
 
 
 
-local rnd = math.random
+local rnd, min = math.random, math.min
 local ins, rem = table.insert, table.remove
 local gc = love.graphics
 
@@ -493,7 +493,7 @@ local function triggerHint()
             showText("?")
         end
         SFX.play(n < 13 and 'untick' or 'tick', .42)
-    end):setDuration(0.0626):setLoop('repeat', 14):setUnique('hint_noLine'):run()
+    end):setDuration(.0626):setLoop('repeat', 14):setUnique('hint_noLine'):run()
 end
 
 ---@type Zenitha.Scene
@@ -700,7 +700,7 @@ function scene.mouseDown(x, y, k)
             titleColor[1] = MATH.lerp(origColor[1], 0, t)
             titleColor[2] = MATH.lerp(origColor[2], 0, t)
             titleColor[3] = MATH.lerp(origColor[3], 0, t)
-        end):setDuration(0.26):setUnique('titleColorTransition'):run()
+        end):setDuration(.26):setUnique('titleColorTransition'):run()
 
         local pattern = dumpGrid(DATA.tickMat)
         if pattern == gridConst.left then
@@ -715,12 +715,12 @@ function scene.mouseDown(x, y, k)
             local y0 = board.Y
             TWEEN.new(function(t)
                 board.Y = y0 - 12 * t
-            end):setEase('Linear'):setDuration(0.26):setUnique('egg_moveUp'):run()
+            end):setEase('Linear'):setDuration(.26):setUnique('egg_moveUp'):run()
         elseif pattern == gridConst.down then
             local y0 = board.Y
             TWEEN.new(function(t)
                 board.Y = y0 + 12 * t
-            end):setEase('Linear'):setDuration(0.26):setUnique('egg_moveDown'):run()
+            end):setEase('Linear'):setDuration(.26):setUnique('egg_moveDown'):run()
         elseif pattern == gridConst.T then
             MSG.new('check', "Techmino is fun!", 4.2)
         elseif pattern == gridConst.Z then
@@ -729,7 +729,7 @@ function scene.mouseDown(x, y, k)
             hardMode = not hardMode
             if hardMode then
                 if DATA.sound then
-                    BGM.set('naive', 'pitch', 0.626, 0)
+                    BGM.set('naive', 'pitch', .626, 0)
                 end
                 MSG.new('warn', Text.hardMode, 2.6)
             else
@@ -818,7 +818,7 @@ end
 function scene.update(dt)
     if holdTimer then
         holdTimer = holdTimer + dt
-        if holdTimer > 0.442 then
+        if holdTimer > .442 then
             if next(dragging) then
                 local cx, cy = next(dragging):match('(%d)(%d)')
                 cx, cy = tonumber(cx), tonumber(cy)
@@ -862,6 +862,10 @@ function scene.draw()
     gc.translate(board.X, board.Y)
 
     -- Board & Separator
+    if DATA.win > 0 then
+        gc.setColor(1, 1, 0, min(DATA.win / 62) * .26)
+        gc.rectangle('fill', 0, 0, board.titleW, board.infoH)
+    end
     gc.setColor(hardMode and COLOR.R or COLOR.D)
     gc.setLineWidth(4)
     gc.rectangle('line', 0, 0, board.W, board.H)
@@ -963,7 +967,7 @@ scene.widgetList = {
             if DATA.sound then
                 BGM.play('naive')
                 if hardMode then
-                    BGM.set('naive', 'pitch', 0.626, 0)
+                    BGM.set('naive', 'pitch', .626, 0)
                 end
             else
                 BGM.stop()
