@@ -120,8 +120,6 @@ local versionText = gc.newText(FONT.get(20))
 versionText:set(require 'version'.appVer)
 
 local egg = {
-    AD_BC = false,
-    back_to_future = false,
     bingo_clicker = 0,
     bingo_target = 1,
 }
@@ -476,9 +474,8 @@ local function selectDate(option)
         if m == 0 then m, y = 12, y - 1 end
         if y == -1 then
             y = 99
-            if not egg.AD_BC then
+            if TASK.lock('AD_BC') then
                 MSG.new('check', "We can travel to AD, to BC", 4.2)
-                egg.AD_BC = true
             end
         end
         SCN.swapTo('main', 'swipeR', ('%02d%02d%02d'):format(y, m, d))
@@ -489,17 +486,15 @@ local function selectDate(option)
         if m == 13 then m, y = 1, y + 1 end
         if y == 100 then
             y = 0
-            if not egg.AD_BC then
+            if TASK.lock('AD_BC') then
                 MSG.new('check', "We can travel to AD, to BC", 4.2)
-                egg.AD_BC = true
             end
         end
         if ('%02d%02d%02d'):format(y, m, d) <= os.date('!%y%m%d') then
             SCN.swapTo('main', 'swipeL', ('%02d%02d%02d'):format(y, m, d))
         else
-            if not egg.back_to_future then
+            if TASK.lock('back_to_future') then
                 MSG.new('check', "Back To The Future", 4.2)
-                egg.back_to_future = true
             end
         end
     elseif option == 'now' then
