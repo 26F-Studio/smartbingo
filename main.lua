@@ -44,10 +44,12 @@ TASK.new(function()
 end)
 
 SFX.load({
-    untick='untick.ogg',
-    solve='solve.ogg',
-    copy='copy.ogg',
-    paste='paste.ogg',
+    tick = 'tick.ogg',
+    untick = 'untick.ogg',
+    solve = 'solve.ogg',
+    copy = 'copy.ogg',
+    paste = 'paste.ogg',
+    error = 'error.ogg',
 })
 
 FONT.load('unifont', 'unifont.otf')
@@ -379,6 +381,92 @@ local gridConst = {
         { 0, 0, 1, 0, 0 },
         { 0, 0, 1, 0, 0 },
     },
+    paste = {
+        dumpGrid {
+            { 1, 1, 1, 1, 0 },
+            { 1, 0, 0, 0, 1 },
+            { 1, 1, 1, 1, 0 },
+            { 1, 0, 0, 0, 0 },
+            { 1, 0, 0, 0, 0 },
+        },
+        dumpGrid {
+            { 1, 1, 1, 1, 0 },
+            { 1, 0, 0, 0, 1 },
+            { 1, 1, 1, 1, 0 },
+            { 1, 0, 0, 0, 0 },
+            { 1, 0, 0, 0, 0 },
+        },
+        dumpGrid {
+            { 1, 1, 1, 1, 1 },
+            { 1, 0, 0, 0, 1 },
+            { 1, 1, 1, 1, 1 },
+            { 1, 0, 0, 0, 0 },
+            { 1, 0, 0, 0, 0 },
+        },
+        dumpGrid {
+            { 1, 1, 1, 0, 0 },
+            { 1, 0, 0, 1, 0 },
+            { 1, 1, 1, 0, 0 },
+            { 1, 0, 0, 0, 0 },
+            { 1, 0, 0, 0, 0 },
+        },
+        dumpGrid {
+            { 0, 1, 1, 1, 0 },
+            { 0, 1, 0, 0, 1 },
+            { 0, 1, 1, 1, 0 },
+            { 0, 1, 0, 0, 0 },
+            { 0, 1, 0, 0, 0 },
+        },
+        dumpGrid {
+            { 1, 1, 1, 1, 0 },
+            { 1, 0, 0, 1, 0 },
+            { 1, 1, 1, 1, 0 },
+            { 1, 0, 0, 0, 0 },
+            { 1, 0, 0, 0, 0 },
+        },
+        dumpGrid {
+            { 0, 1, 1, 1, 1 },
+            { 0, 1, 0, 0, 1 },
+            { 0, 1, 1, 1, 1 },
+            { 0, 1, 0, 0, 0 },
+            { 0, 1, 0, 0, 0 },
+        },
+        dumpGrid {
+            { 1, 1, 1, 0, 0 },
+            { 1, 0, 1, 0, 0 },
+            { 1, 1, 1, 0, 0 },
+            { 1, 0, 0, 0, 0 },
+            { 1, 0, 0, 0, 0 },
+        },
+        dumpGrid {
+            { 0, 1, 1, 1, 0 },
+            { 0, 1, 0, 1, 0 },
+            { 0, 1, 1, 1, 0 },
+            { 0, 1, 0, 0, 0 },
+            { 0, 1, 0, 0, 0 },
+        },
+        dumpGrid {
+            { 0, 0, 1, 1, 1 },
+            { 0, 0, 1, 0, 1 },
+            { 0, 0, 1, 1, 1 },
+            { 0, 0, 1, 0, 0 },
+            { 0, 0, 1, 0, 0 },
+        },
+        dumpGrid { -- V
+            { 1, 0, 0, 0, 1 },
+            { 1, 0, 0, 0, 1 },
+            { 1, 0, 0, 0, 1 },
+            { 0, 1, 0, 1, 0 },
+            { 0, 0, 1, 0, 0 },
+        },
+        dumpGrid { -- V
+            { 1, 0, 0, 0, 1 },
+            { 1, 0, 0, 0, 1 },
+            { 0, 1, 0, 1, 0 },
+            { 0, 1, 0, 1, 0 },
+            { 0, 0, 1, 0, 0 },
+        },
+    },
 }
 local function selectDate(option)
     if option == 'prev' then
@@ -679,6 +767,53 @@ function scene.keyDown(k, rep)
         end
     elseif k == 'h' then
         triggerHint()
+    elseif k == 'c' then
+        local output = ""
+        for i = 1, 5 do
+            output = output .. table.concat(DATA.tickMat[i]) .. "\n"
+        end
+        love.system.setClipboardText(output)
+        SFX.play('copy')
+        if TASK.lock('copy') then
+            MSG.new('check', "Wow you can even copy", 4.2)
+        end
+    elseif k == 'v' then
+        local input = love.system.getClipboardText()
+        if input and type(input) == 'string' then
+            input = input:gsub('%s', '')
+            if input:find('%D') then
+                MSG.new('warn', "Can only paste numbers", 4.2)
+                SFX.play('error')
+            else
+                local lastEdit = 0
+                local pos = 1
+                for c in input:gmatch("%d") do
+                    if pos > 25 then
+                        lastEdit = 26
+                        break
+                    end
+                    c = tonumber(c)
+                    if c <= 2 then
+                        DATA.tickMat[math.ceil(pos / 5)][(pos - 1) % 5 + 1] = c
+                        lastEdit = pos
+                    else
+                        if TASK.lock('count2+') then MSG.new('warn', "Cannot count over 2", 4.2) end
+                        break
+                    end
+                    pos = pos + 1
+                end
+                if lastEdit == 25 then
+                    SFX.play('paste')
+                else
+                    if lastEdit > 25 then
+                        if TASK.lock('stackoverflow') then MSG.new('warn', "Stack Overflow", 4.2) end
+                    else
+                        if TASK.lock('stackunderflow') then MSG.new('warn', "Stack Underflow", 4.2) end
+                    end
+                    SFX.play('error')
+                end
+            end
+        end
     end
     return true
 end
@@ -714,6 +849,8 @@ function scene.mouseDown(x, y, k)
             selectDate('now')
         elseif TABLE.find(gridConst.R, pattern) then
             selectDate('random')
+        elseif TABLE.find(gridConst.paste, pattern) then
+            scene.keyDown('v')
         elseif pattern == gridConst.up then
             local y0 = board.Y
             TWEEN.new(function(t)
@@ -841,7 +978,7 @@ function scene.update(dt)
     end
 end
 
-local tick = GC.load { w=62, h=62,
+local tick = GC.load { w = 62, h = 62,
     { 'move',  4,      4 },
     { 'setLW', 10 },
     { 'setCL', 0,      0,  0 },
@@ -850,7 +987,7 @@ local tick = GC.load { w=62, h=62,
     { 'setCL', COLOR.L },
     { 'line',  2,      28, 26, 48, 50, 3 },
 }
-local cross = GC.load { w=62, h=62,
+local cross = GC.load { w = 62, h = 62,
     { 'move',  4,   4 },
     { 'setLW', 8 },
     { 'setCL', 0,   0,   0 },
